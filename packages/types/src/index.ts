@@ -11,3 +11,8 @@ export type CreateApplicationPayload = {
 export type CreateCompanyPayload = {
     name: string;
 };
+
+export type UserInfoPayload = {
+    email: string;
+    password: string;
+};

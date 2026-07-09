@@ -1,14 +1,14 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../prisma.js';
+import { requireAuth } from '../middleware/require-auth.js';
 import { CreateApplicationPayload } from '@job-tracker/types';
 
 const router = Router();
-const DUMMY_USER_ID = "dummy-user-123"; // Temporary until users are implemented
 
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", requireAuth, async (req: Request, res: Response) => {
     try {
         const applications = await prisma.application.findMany({
-            where: { userId: DUMMY_USER_ID }, // Change this
+            where: { userId: req.userId! },
             include: { company: true }
         });
 
@@ -18,7 +18,7 @@ router.get("/", async (req: Request, res: Response) => {
     }
 });
 
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", requireAuth, async (req: Request, res: Response) => {
     try {
         const { roleTitle, jobUrl, status, salary, companyId } = req.body as CreateApplicationPayload;
         const application = await prisma.application.create({
@@ -28,7 +28,7 @@ router.post("/", async (req: Request, res: Response) => {
                 jobUrl: jobUrl || null,
                 salary: salary || null,
                 companyId: companyId || null,
-                userId: DUMMY_USER_ID // Change this
+                userId: req.userId!
             },
         });
 

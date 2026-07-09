@@ -11,8 +11,17 @@ model User {
   email         String            @unique
   passwordHash  String
   createdAt     DateTime          @default(now())
-  applications  Application[]
+  sessions      Session[]
   companies     Company[]
+  applications  Application[]
+}
+
+model Session {
+  id            String            @id @default(uuid())
+  expiresAt     DateTime
+  createdAt     DateTime          @default(now())
+  userId        String
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Company {
