@@ -1,7 +1,24 @@
-function App() {
+import { Routes, Route } from 'react-router-dom';
+import Layout from './components/layout/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import ApplicationsPage from './pages/ApplicationsPage';
+import CompaniesPage from './pages/CompaniesPage';
+import StatisticsPage from './pages/StatisticsPage';
+
+export default function App() {
   return (
-    <div></div>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route element={<ProtectedRoute />}>
+        <Route element={<Layout />}>
+          <Route path="/" element={<ApplicationsPage />} />
+          <Route path="/companies" element={<CompaniesPage />} />
+          <Route path="/statistics" element={<StatisticsPage />} />
+        </Route>
+      </Route>
+    </Routes>
   );
 }
-
-export default App
