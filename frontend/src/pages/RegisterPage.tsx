@@ -11,7 +11,6 @@ import {
     Typography
 } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
-import styles from './RegisterPage.module.css';
 
 export default function RegisterPage() {
     const { register } = useAuth();

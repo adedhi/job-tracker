@@ -11,7 +11,6 @@ import {
     Typography
 } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
-import styles from './LoginPage.module.css';
 
 export default function LoginPage() {
     const { login } = useAuth();
