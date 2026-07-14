@@ -222,8 +222,8 @@ export default function ApplicationsPage() {
             )}
             <ApplicationDialog
                 open={dialogOpen}
-                onClose={() => setDialogOpen(false)}
                 application={editingApplication}
+                onClose={() => setDialogOpen(false)}
                 onSaved={loadApplications}
             />
         </Container>
