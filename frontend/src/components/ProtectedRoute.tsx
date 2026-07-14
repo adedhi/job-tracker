@@ -1,11 +1,12 @@
 import { Navigate, Outlet } from 'react-router-dom';
+import { CircularProgress } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
 
 export default function ProtectedRoute() {
     const { user, isLoading } = useAuth();
 
     if (isLoading) {
-        return <div>Loading...</div>; // Replace with Spinner
+        return <div><CircularProgress /></div>;
     }
 
     if (!user) {
