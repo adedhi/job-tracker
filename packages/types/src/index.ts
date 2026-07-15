@@ -45,4 +45,4 @@ export type CreateCompanyPayload = {
     name: string;
 };
 
-export type UpdateCompanyPayload = Partial<CreateCompanyPayload>;
+export type UpdateCompanyPayload = CreateCompanyPayload; // If any new editable fields are added to Company, make this Partial<>

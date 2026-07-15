@@ -39,6 +39,20 @@ router.get("/:id", async (req: Request<{ id: string }>, res: Response) => {
 router.post("/", async (req: Request, res: Response) => {
     try {
         const { name } = req.body as CreateCompanyPayload;
+
+        const existing = await prisma.company.findUnique({
+            where: {
+                userId_name: {
+                    userId: req.userId!,
+                    name: name
+                }
+            }
+        });
+
+        if (existing && existing.id !== req.params.id) {
+            return res.status(409).json({ error: "You already have a company with this name" });
+        }
+
         const company = await prisma.company.create({
             data: {
                 name,
@@ -55,6 +69,20 @@ router.post("/", async (req: Request, res: Response) => {
 router.patch("/:id", async (req: Request<{ id: string }>, res: Response) => {
     try {
         const updates = req.body as UpdateCompanyPayload;
+
+        const existing = await prisma.company.findUnique({
+            where: {
+                userId_name: {
+                    userId: req.userId!,
+                    name: updates.name
+                }
+            }
+        });
+
+        if (existing) {
+            return res.status(409).json({ error: "You already have a company with this name" });
+        }
+
         const result = await prisma.company.updateMany({
             where: { id: req.params.id, userId: req.userId! },
             data: updates

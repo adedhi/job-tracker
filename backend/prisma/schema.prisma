@@ -32,6 +32,8 @@ model Company {
   applications  Application[]
   userId        String
   user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
 }
 
 model Application {
