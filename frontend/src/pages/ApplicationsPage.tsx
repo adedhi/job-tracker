@@ -1,14 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
-    Container, Box, Typography, Button, TextField, Chip,
-    Table, TableHead, TableBody, TableRow, TableCell, TableSortLabel,
-    IconButton, InputAdornment, CircularProgress,
+    Container, Box, Typography, Button, TextField, Chip, Table,
+    TableHead, TableBody, TableRow, TableCell, TableSortLabel,
+    IconButton, InputAdornment, CircularProgress
 } from '@mui/material';
 import { Add, Edit, Delete, Search } from '@mui/icons-material';
 import { ApplicationResponse, ApplicationStatus } from '@job-tracker/types';
 import { fetchApplications, deleteApplication } from '../api/applications';
 import { STATUS_COLORS } from '../theme';
-import ApplicationDialog from '../components/ApplicationDialog';
+import ApplicationDialog from '../components/dialog/ApplicationDialog';
 
 const STATUSES: ApplicationStatus[] = ["APPLIED", "INTERVIEWING", "REJECTED", "OFFER", "ACCEPTED"];
 type SortKey = keyof Pick<
@@ -182,12 +182,7 @@ export default function ApplicationsPage() {
                     </TableHead>
                     <TableBody>
                         {filteredApplications.map((app) => (
-                            <TableRow
-                                key={app.id}
-                                hover
-                                onClick={() => openEditDialog(app)}
-                                sx={{ cursor: 'pointer' }}
-                            >
+                            <TableRow key={app.id}>
                                 <TableCell>{app.roleTitle}</TableCell>
                                 <TableCell>{app.company?.name ?? '—'}</TableCell>
                                 <TableCell>

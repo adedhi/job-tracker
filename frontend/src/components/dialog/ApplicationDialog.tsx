@@ -1,17 +1,13 @@
 import { useState, useEffect, SubmitEvent } from 'react';
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  TextField, Button, MenuItem, Autocomplete, Box, Typography,
-  createFilterOptions,
+  Dialog, DialogTitle, DialogContent, DialogActions, TextField,
+  Button, MenuItem, Autocomplete, Box, Typography, createFilterOptions
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
-import {
-  ApplicationResponse,
-  ApplicationStatus,
-  CompanyResponse,
-} from '@job-tracker/types';
-import { createApplication, updateApplication } from '../api/applications';
-import { fetchCompanies, createCompany } from '../api/companies';
+import { ApplicationResponse, ApplicationStatus, CompanyResponse } from '@job-tracker/types';
+import { createApplication, updateApplication } from '../../api/applications';
+import { fetchCompanies } from '../../api/companies';
+import CompanyDialog from './CompanyDialog';
 
 const STATUSES: ApplicationStatus[] = ["APPLIED", "INTERVIEWING", "REJECTED", "OFFER", "ACCEPTED"];
 
@@ -20,7 +16,7 @@ type CompanyOption = CompanyResponse | typeof EXPLICIT_CREATE;
 
 const filter = createFilterOptions<CompanyOption>();
 
-export default function ApplicationsDialog({
+export default function ApplicationDialog({
     open,
     application,
     onClose,
@@ -38,53 +34,39 @@ export default function ApplicationsDialog({
     const [companies, setCompanies] = useState<CompanyResponse[]>([]);
     const [selectedCompany, setSelectedCompany] = useState<CompanyResponse | null>(null);
     const [companyInput, setCompanyInput] = useState("");
-    const [newCompanyName, setNewCompanyName] = useState("");
-    const [newCompanyDialogOpen, setNewCompanyDialogOpen] = useState(false);
+    const [pendingCompanyName, setPendingCompanyName] = useState("");
+    const [companyDialogOpen, setCompanyDialogOpen] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [isCreatingCompany, setIsCreatingCompany] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const isEditing = application !== null;
     const isFormValid = roleTitle.trim().length > 0;
 
-    function openNewCompanyDialog(prefill: string) {
-        setNewCompanyName(prefill);
-        setNewCompanyDialogOpen(true);
-    }
-
     async function handleCompanyChange(value: CompanyOption | string | null) {
         if (value === null) {
             setSelectedCompany(null);
+            setCompanyInput("");
             return;
         }
 
         if (typeof value === "string") {
-            openNewCompanyDialog(value);
+            setPendingCompanyName(value);
+            setCompanyDialogOpen(true);
             return;
         }
 
         if (value.id === EXPLICIT_CREATE.id) {
-            openNewCompanyDialog(companyInput);
+            setPendingCompanyName(companyInput);
+            setCompanyDialogOpen(true);
             return;
         }
 
         setSelectedCompany(value as CompanyResponse);
     }
 
-    async function handleCreateCompany() {
-        if (!newCompanyName.trim()) return;
-        setIsCreatingCompany(true);
-
-        try {
-            const created = await createCompany({ name: newCompanyName.trim() });
-            setCompanies((prev) => [...prev, created]);
-            setSelectedCompany(created);
-            setCompanyInput(created.name);
-            setNewCompanyDialogOpen(false);
-        } catch (error) {
-            setError(error instanceof Error ? error.message : "Failed to create company");
-        } finally {
-            setIsCreatingCompany(false);
-        }
+    function handleSaveCompany(company: CompanyResponse) {
+        setCompanies((prev) => [...prev, company]);
+        setSelectedCompany(company);
+        setCompanyInput(company.name);
     }
 
     async function handleSubmit(e: SubmitEvent) {
@@ -162,7 +144,11 @@ export default function ApplicationsDialog({
                                 const filtered = filter(options, params) as CompanyOption[];
                                 return [...filtered, EXPLICIT_CREATE];
                             }}
-                            getOptionLabel={(option) => (typeof option === "string" ? option : option.name)}
+                            getOptionLabel={(option) => {
+                                if (typeof option === "string") return option;
+                                if (option.id === EXPLICIT_CREATE.id) return companyInput;
+                                return option.name;
+                            }}
                             value={selectedCompany}
                             inputValue={companyInput}
                             onInputChange={(_, value) => setCompanyInput(value)}
@@ -229,36 +215,13 @@ export default function ApplicationsDialog({
                     </DialogActions>
                 </Box>
             </Dialog>
-            <Dialog
-                open={newCompanyDialogOpen}
-                onClose={() => setNewCompanyDialogOpen(false)}
-                maxWidth="xs"
-                fullWidth
-            >
-                <DialogTitle>Add Company</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        autoFocus
-                        label="Company name"
-                        value={newCompanyName}
-                        onChange={(e) => setNewCompanyName(e.target.value)}
-                        fullWidth
-                        sx={{ mt: 1 }}
-                    />
-                </DialogContent>
-                <DialogActions sx={{ px: 3, pb: 2 }}>
-                    <Button onClick={() => setNewCompanyDialogOpen(false)}>
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="contained"
-                        onClick={handleCreateCompany}
-                        disabled={isCreatingCompany || !newCompanyName.trim()}
-                    >
-                        {isCreatingCompany ? "Adding..." : "Add Company"}
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <CompanyDialog
+                open={companyDialogOpen}
+                company={null}
+                initialName={pendingCompanyName}
+                onClose={() => setCompanyDialogOpen(false)}
+                onSaved={handleSaveCompany}
+            />
         </>
     );
 }
