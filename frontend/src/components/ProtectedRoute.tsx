@@ -1,12 +1,23 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import { CircularProgress } from '@mui/material';
+import { Box, CircularProgress } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
 
 export default function ProtectedRoute() {
     const { user, isLoading } = useAuth();
 
     if (isLoading) {
-        return <div><CircularProgress /></div>;
+        return (
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    minHeight: "calc(100vh - 64px)"
+                }}
+            >
+                <CircularProgress size={100} />
+            </Box>
+        );
     }
 
     if (!user) {

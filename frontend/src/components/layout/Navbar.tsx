@@ -3,6 +3,7 @@ import {
     AppBar,
     Box,
     Button,
+    Skeleton,
     Tab,
     Tabs,
     Toolbar,
@@ -17,7 +18,7 @@ const NAV_ITEMS = [
 ];
 
 export default function Navbar() {
-    const { user, logout } = useAuth();
+    const { user, logout, isLoading } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -49,10 +50,16 @@ export default function Navbar() {
                             label={item.label}
                             value={item.path}
                             to={item.path}
+                            disabled={isLoading}
                         />
                     ))}
                 </Tabs>
-                {user && (
+                {isLoading ? (
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                        <Skeleton variant="text" width={150} sx={{ bgcolor: "#ffffff33" }} />
+                        <Skeleton variant="rounded" width={80} height={36} sx={{ bgcolor: "#ffffff33" }} />
+                    </Box>
+                ) : user ? (
                     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                         <Typography variant="body2">
                             {user.email}
@@ -61,7 +68,7 @@ export default function Navbar() {
                             Log out
                         </Button>
                     </Box>
-                )}
+                ) : null}
             </Toolbar>
         </AppBar>
     );
