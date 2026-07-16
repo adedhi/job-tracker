@@ -5,6 +5,7 @@ import {
 } from '@mui/material';
 import { CompanyResponse } from '@job-tracker/types';
 import { createCompany, updateCompany } from '../../api/companies';
+import { useSnackbar } from '../../hooks/useSnackbar';
 
 export default function CompanyDialog({
     open,
@@ -19,6 +20,7 @@ export default function CompanyDialog({
     onClose: () => void;
     onSaved: (company: CompanyResponse) => void;
 }) {
+    const { showSnackbar } = useSnackbar();
     const [name, setName] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,6 +38,7 @@ export default function CompanyDialog({
                 : await createCompany({ name: name.trim() });
             onSaved(saved);
             onClose();
+            showSnackbar(isEditing ? "Company updated" : "Company added");
         } catch (error) {
             setError(error instanceof Error ? error.message : "Failed to save company");
         } finally {

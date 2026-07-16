@@ -7,6 +7,7 @@ import {
 import { Add, Edit, Delete, Search } from '@mui/icons-material';
 import { ApplicationResponse, ApplicationStatus } from '@job-tracker/types';
 import { fetchApplications, deleteApplication } from '../api/applications';
+import { useSnackbar } from '../hooks/useSnackbar';
 import { STATUS_COLORS } from '../theme';
 import ApplicationDialog from '../components/dialog/ApplicationDialog';
 import ConfirmDialog from '../components/dialog/ConfirmDialog';
@@ -18,6 +19,7 @@ type SortKey = keyof Pick<
 >;
 
 export default function ApplicationsPage() {
+    const { showSnackbar } = useSnackbar();
     const [applications, setApplications] = useState<ApplicationResponse[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState("");
@@ -88,8 +90,9 @@ export default function ApplicationsPage() {
             await deleteApplication(appToDelete);
             setApplications((prev) => prev.filter((app) => app.id !== appToDelete));
             setAppToDelete(null);
+            showSnackbar("Application deleted");
         } catch (error) {
-            alert(error instanceof Error ? error.message : "Failed to delete application");
+            showSnackbar(error instanceof Error ? error.message : "Failed to delete application", "error");
         }
     }
 

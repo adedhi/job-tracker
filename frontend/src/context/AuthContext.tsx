@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, ReactNode, useEffect, useState } from 'react';
 import { User } from '@job-tracker/types';
 import { loginUser, registerUser, logoutUser, fetchCurrentUser } from '../api/auth';
 
