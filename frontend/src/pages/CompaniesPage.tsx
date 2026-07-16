@@ -7,12 +7,14 @@ import {
 import { Add, Edit, Delete, Search, ExpandMore, ExpandLess } from '@mui/icons-material';
 import { CompanyWithApplicationsResponse, CompanyResponse, ApplicationResponse } from '@job-tracker/types';
 import { fetchCompanies, deleteCompany } from '../api/companies';
+import { useSnackbar } from '../hooks/useSnackbar';
 import { STATUS_COLORS } from '../theme';
 import CompanyDialog from '../components/dialog/CompanyDialog';
 import ApplicationDialog from '../components/dialog/ApplicationDialog';
 import ConfirmDialog from '../components/dialog/ConfirmDialog';
 
 export default function CompaniesPage() {
+    const { showSnackbar } = useSnackbar();
     const [companies, setCompanies] = useState<CompanyWithApplicationsResponse[]>([]);
     const [search, setSearch] = useState("");
     const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -59,8 +61,9 @@ export default function CompaniesPage() {
             await deleteCompany(companyToDelete.id);
             setCompanies((prev) => prev.filter((company) => company.id !== companyToDelete.id));
             setCompanyToDelete(null);
+            showSnackbar("Company deleted");
         } catch (error) {
-            alert(error instanceof Error ? error.message : "Failed to delete company");
+            showSnackbar(error instanceof Error ? error.message : "Failed to delete company", "error");
         }
     }
 

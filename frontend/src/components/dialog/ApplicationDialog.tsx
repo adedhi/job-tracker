@@ -7,6 +7,7 @@ import { Add } from '@mui/icons-material';
 import { ApplicationResponse, ApplicationStatus, CompanyResponse } from '@job-tracker/types';
 import { createApplication, updateApplication } from '../../api/applications';
 import { fetchCompanies } from '../../api/companies';
+import { useSnackbar } from '../../hooks/useSnackbar';
 import CompanyDialog from './CompanyDialog';
 
 const STATUSES: ApplicationStatus[] = ["APPLIED", "INTERVIEWING", "REJECTED", "OFFER", "ACCEPTED"];
@@ -27,6 +28,7 @@ export default function ApplicationDialog({
   onClose: () => void;
   onSaved: () => void;
 }) {
+    const { showSnackbar } = useSnackbar();
     const [roleTitle, setRoleTitle] = useState("");
     const [status, setStatus] = useState<ApplicationStatus>("APPLIED");
     const [jobUrl, setJobUrl] = useState("");
@@ -90,6 +92,7 @@ export default function ApplicationDialog({
             }
             onSaved();
             onClose();
+            showSnackbar(isEditing ? "Application updated" : "Application added");
         } catch (error) {
             setError(error instanceof Error ? error.message : "Failed to save application");
         } finally {
