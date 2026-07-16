@@ -9,6 +9,7 @@ import { ApplicationResponse, ApplicationStatus } from '@job-tracker/types';
 import { fetchApplications, deleteApplication } from '../api/applications';
 import { STATUS_COLORS } from '../theme';
 import ApplicationDialog from '../components/dialog/ApplicationDialog';
+import ConfirmDialog from '../components/dialog/ConfirmDialog';
 
 const STATUSES: ApplicationStatus[] = ["APPLIED", "INTERVIEWING", "REJECTED", "OFFER", "ACCEPTED"];
 type SortKey = keyof Pick<
@@ -25,6 +26,7 @@ export default function ApplicationsPage() {
     const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editingApplication, setEditingApplication] = useState<ApplicationResponse | null>(null);
+    const [appToDelete, setAppToDelete] = useState<string | null>(null);
 
     const filteredApplications = useMemo(() => {
         let result = applications;
@@ -80,10 +82,15 @@ export default function ApplicationsPage() {
         }
     }
 
-    async function handleDelete(id: string) {
-        if (!confirm("Delete this application? This cannot be undone.")) return;
-        await deleteApplication(id);
-        setApplications((prev) => prev.filter((a) => a.id !== id));
+    async function confirmDelete() {
+        if (!appToDelete) return;
+        try {
+            await deleteApplication(appToDelete);
+            setApplications((prev) => prev.filter((app) => app.id !== appToDelete));
+            setAppToDelete(null);
+        } catch (error) {
+            alert(error instanceof Error ? error.message : "Failed to delete application");
+        }
     }
 
     function openCreateDialog() {
@@ -206,7 +213,7 @@ export default function ApplicationsPage() {
                                     <IconButton size="small" onClick={() => openEditDialog(app)}>
                                         <Edit fontSize="small" />
                                     </IconButton>
-                                    <IconButton size="small" onClick={() => handleDelete(app.id)}>
+                                    <IconButton size="small" onClick={() => setAppToDelete(app.id)}>
                                         <Delete fontSize="small" />
                                     </IconButton>
                                 </TableCell>
@@ -220,6 +227,13 @@ export default function ApplicationsPage() {
                 application={editingApplication}
                 onClose={() => setDialogOpen(false)}
                 onSaved={loadApplications}
+            />
+            <ConfirmDialog
+                open={appToDelete !== null}
+                title="Confirm Deletion"
+                body="Delete this application? This cannot be undone."
+                onConfirm={confirmDelete}
+                onClose={() => setAppToDelete(null)}
             />
         </Container>
     );
