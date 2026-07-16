@@ -10,6 +10,7 @@ import { fetchCompanies, deleteCompany } from '../api/companies';
 import { STATUS_COLORS } from '../theme';
 import CompanyDialog from '../components/dialog/CompanyDialog';
 import ApplicationDialog from '../components/dialog/ApplicationDialog';
+import ConfirmDialog from '../components/dialog/ConfirmDialog';
 
 export default function CompaniesPage() {
     const [companies, setCompanies] = useState<CompanyWithApplicationsResponse[]>([]);
@@ -17,6 +18,7 @@ export default function CompaniesPage() {
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [editingCompany, setEditingCompany] = useState<CompanyResponse | null>(null);
     const [editingApplication, setEditingApplication] = useState<ApplicationResponse | null>(null);
+    const [companyToDelete, setCompanyToDelete] = useState<CompanyWithApplicationsResponse | null>(null);
     const [companyDialogOpen, setCompanyDialogOpen] = useState(false);
     const [applicationDialogOpen, setApplicationDialogOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -51,16 +53,12 @@ export default function CompaniesPage() {
         setApplicationDialogOpen(true);
     }
 
-    async function handleDelete(company: CompanyWithApplicationsResponse) {
-        const warning = company.applications.length > 0
-            ? `"${company.name}" has ${company.applications.length} linked application${company.applications.length > 1 ? "s" : ""}. Deleting it may affect those records. Continue?`
-            : `Delete "${company.name}"? This cannot be undone.`;
-        
-        if (!confirm(warning)) return;
-
+    async function confirmDelete() {
+        if (!companyToDelete) return;
         try {
-            await deleteCompany(company.id);
-            setCompanies((prev) => prev.filter((c) => c.id !== company.id));
+            await deleteCompany(companyToDelete.id);
+            setCompanies((prev) => prev.filter((company) => company.id !== companyToDelete.id));
+            setCompanyToDelete(null);
         } catch (error) {
             alert(error instanceof Error ? error.message : "Failed to delete company");
         }
@@ -145,7 +143,7 @@ export default function CompaniesPage() {
                                             <IconButton size="small" onClick={() => openEditDialog(company)}>
                                                 <Edit fontSize="small" />
                                             </IconButton>
-                                            <IconButton size="small" onClick={() => handleDelete(company)}>
+                                            <IconButton size="small" onClick={() => setCompanyToDelete(company)}>
                                                 <Delete fontSize="small" />
                                             </IconButton>
                                         </TableCell>
@@ -210,6 +208,16 @@ export default function CompaniesPage() {
                 application={editingApplication}
                 onClose={() => setApplicationDialogOpen(false)}
                 onSaved={loadCompanies}
+            />
+            <ConfirmDialog
+                open={companyToDelete !== null}
+                title="Confirm Deletion"
+                body={companyToDelete && companyToDelete?.applications?.length > 0
+                    ? `"${companyToDelete.name}" has ${companyToDelete.applications.length} linked application${companyToDelete.applications.length > 1 ? "s" : ""}. Deleting it may affect those records. Continue?`
+                    : `Delete "${companyToDelete?.name ?? ""}"? This cannot be undone.`
+                }
+                onConfirm={confirmDelete}
+                onClose={() => setCompanyToDelete(null)}
             />
         </Container>
     );
