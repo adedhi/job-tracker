@@ -33,7 +33,8 @@ export default function CompaniesPage() {
     async function loadCompanies() {
         setIsLoading(true);
         try {
-            setCompanies(await fetchCompanies());
+            const companies = await fetchCompanies();
+            setCompanies(companies);
         } finally {
             setIsLoading(false);
         }
