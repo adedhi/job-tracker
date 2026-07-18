@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import authRouter from './routers/auth-router.js';
 import applicationRouter from './routers/application-router.js';
 import companyRouter from './routers/company-router.js';
+import { startSessionCleanup } from './helpers/cleanup.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,4 +23,5 @@ app.get('/api/health', (req, res) => {
 });
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
+    startSessionCleanup();
 });
