@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../prisma.js';
+import { logError } from '../helpers/logger.js';
 
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
     try {
@@ -16,6 +17,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
         req.userId = session.userId;
         next();
     } catch (error) {
+        logError("[require-auth]: requireAuth", error);
         res.status(500).json({ error: "Authentication check failed" });
     }
 }

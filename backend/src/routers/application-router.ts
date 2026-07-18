@@ -1,7 +1,8 @@
 import { Router, Request, Response } from 'express';
+import { CreateApplicationPayload, UpdateApplicationPayload } from '@job-tracker/types';
 import { prisma } from '../prisma.js';
 import { requireAuth } from '../middleware/require-auth.js';
-import { CreateApplicationPayload, UpdateApplicationPayload } from '@job-tracker/types';
+import { logError } from '../helpers/logger.js';
 
 const router = Router();
 router.use(requireAuth); // All endpoints should require authentication
@@ -15,6 +16,7 @@ router.get("/", async (req: Request, res: Response) => {
 
         res.status(200).json(applications);
     } catch (error) {
+        logError("[application-router]: GET /", error);
         res.status(500).json({ error: "Failed to fetch applications" });
     }
 });
@@ -32,6 +34,7 @@ router.get("/:id", async (req: Request<{ id: string }>, res: Response) => {
 
         res.status(200).json(application);
     } catch (error) {
+        logError("[application-router]: GET /:id", error);
         res.status(500).json({ error: "Failed to fetch application" });
     }
 });
@@ -52,6 +55,7 @@ router.post("/", async (req: Request, res: Response) => {
 
         res.status(201).json(application);
     } catch (error) {
+        logError("[application-router]: POST /", error);
         res.status(500).json({ error: "Failed to create application" });
     }
 });
@@ -75,6 +79,7 @@ router.patch("/:id", async (req: Request<{ id: string }>, res: Response) => {
 
         res.status(200).json(updated);
     } catch (error) {
+        logError("[application-router]: PATCH /:id", error);
         res.status(500).json({ error: "Failed to update application" });
     }
 });
@@ -90,6 +95,7 @@ router.delete("/:id", async (req: Request<{ id: string }>, res: Response) => {
         }
         res.status(200).json({ message: "Application deleted" });
     } catch (error) {
+        logError("[application-router]: DELETE /:id", error);
         res.status(500).json({ error: "Failed to delete application" });
     }
 });
