@@ -1,8 +1,10 @@
 import { Router, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
+import { UserInfoPayload } from '@job-tracker/types';
 import { prisma } from '../prisma.js';
 import { requireAuth } from '../middleware/require-auth.js';
-import { UserInfoPayload } from '@job-tracker/types';
+import { authRateLimiter } from '../middleware/rate-limit.js';
+import { logError } from '../helpers/logger.js';
 
 const router = Router();
 const SESSION_DURATION_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
@@ -24,7 +26,7 @@ router.get("/me", requireAuth, async (req: Request, res: Response) => {
     res.status(200).json(user);
 });
 
-router.post("/register", async (req: Request, res: Response) => {
+router.post("/register", authRateLimiter, async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body as UserInfoPayload;
         if (!email || !password) {
@@ -51,11 +53,12 @@ router.post("/register", async (req: Request, res: Response) => {
         setSessionCookie(res, session.id);
         res.status(201).json({ id: user.id, email: user.email });
     } catch (error) {
+        logError("[auth-router]: POST /register", error);
         res.status(500).json({ error: "Failed to register" });
     }
 });
 
-router.post("/login", async (req: Request, res: Response) => {
+router.post("/login", authRateLimiter, async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body as UserInfoPayload;
         if (!email || !password) {
@@ -82,6 +85,7 @@ router.post("/login", async (req: Request, res: Response) => {
         setSessionCookie(res, session.id);
         res.status(200).json({ id: user.id, email: user.email });
     } catch (error) {
+        logError("[auth-router]: POST /login", error);
         res.status(500).json({ error: "Failed to log in" });
     }
 });
@@ -95,6 +99,7 @@ router.post("/logout", async (req: Request, res: Response) => {
         res.clearCookie("sessionId");
         res.status(200).json({ message: "Logged out" });
     } catch (error) {
+        logError("[auth-router]: POST /logout", error);
         res.status(500).json({ error: "Failed to log out" });
     }
 });

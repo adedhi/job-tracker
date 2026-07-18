@@ -1,7 +1,8 @@
 import { Router, Request, Response } from 'express';
+import { CreateCompanyPayload, UpdateCompanyPayload } from '@job-tracker/types';
 import { prisma } from '../prisma.js';
 import { requireAuth } from '../middleware/require-auth.js';
-import { CreateCompanyPayload, UpdateCompanyPayload } from '@job-tracker/types';
+import { logError } from '../helpers/logger.js';
 
 const router = Router();
 router.use(requireAuth); // All endpoints should require authentication
@@ -15,6 +16,7 @@ router.get("/", async (req: Request, res: Response) => {
 
         res.status(200).json(companies);
     } catch (error) {
+        logError("[company-router]: GET /", error);
         res.status(500).json({ error: "Failed to fetch companies" });
     }
 });
@@ -32,6 +34,7 @@ router.get("/:id", async (req: Request<{ id: string }>, res: Response) => {
 
         res.status(200).json(company);
     } catch (error) {
+        logError("[company-router]: GET /:id", error);
         res.status(500).json({ error: "Failed to fetch company" });
     }
 });
@@ -62,6 +65,7 @@ router.post("/", async (req: Request, res: Response) => {
 
         res.status(201).json(company);
     } catch (error) {
+        logError("[company-router]: POST /", error);
         res.status(500).json({ error: "Failed to create company" });
     }
 });
@@ -98,6 +102,7 @@ router.patch("/:id", async (req: Request<{ id: string }>, res: Response) => {
 
         res.status(200).json(updated);
     } catch (error) {
+        logError("[company-router]: PATCH /:id", error);
         res.status(500).json({ error: "Failed to update company" });
     }
 });
@@ -114,6 +119,7 @@ router.delete("/:id", async (req: Request<{ id: string }>, res: Response) => {
 
         res.status(200).json({ message: "Company deleted" });
     } catch (error) {
+        logError("[company-router]: DELETE /:id", error);
         res.status(500).json({ error: "Failed to delete company" });
     }
 });
