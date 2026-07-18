@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { CircularProgress, Container, Box, Button, Paper, Typography } from '@mui/material';
 import {
-  BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Cell,
+  BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Rectangle
 } from 'recharts';
-import { ApplicationResponse } from '@job-tracker/types';
+import { ApplicationResponse, ApplicationStatus } from '@job-tracker/types';
 import { fetchApplications } from '../api/applications';
 import { STATUS_COLORS } from '../theme';
 import {
@@ -27,11 +27,11 @@ export default function StatisticsPage() {
     const [applications, setApplications] = useState<ApplicationResponse[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    const statusCounts = useMemo(() => computeStatusCounts(applications), []);
-    const responseRate = useMemo(() => computeResponseRate(applications), []);
-    const activeCount = useMemo(() => computeActiveCount(applications), []);
-    const overTime = useMemo(() => computeApplicationsOverTime(applications), []);
-    const topCompanies = useMemo(() => computeTopCompanies(applications), []);
+    const statusCounts = useMemo(() => computeStatusCounts(applications), [applications]);
+    const responseRate = useMemo(() => computeResponseRate(applications), [applications]);
+    const activeCount = useMemo(() => computeActiveCount(applications), [applications]);
+    const overTime = useMemo(() => computeApplicationsOverTime(applications), [applications]);
+    const topCompanies = useMemo(() => computeTopCompanies(applications), [applications]);
 
     useEffect(() => {
         fetchApplications().then(setApplications).finally(() => setIsLoading(false));
@@ -88,11 +88,54 @@ export default function StatisticsPage() {
                     <ResponsiveContainer width="100%" height={280}>
                         <BarChart data={statusCounts}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#D8DCE5" />
-                            {/* Continue here */}
+                            <XAxis dataKey="status" tick={{ fontSize: 12 }} />
+                            <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+                            <Tooltip />
+                            <Bar
+                                dataKey="count"
+                                shape={(props: any) => (
+                                    <Rectangle
+                                        {...props}
+                                        fill={STATUS_COLORS[props.payload.status as ApplicationStatus]}
+                                        radius={[4, 4, 0, 0]}
+                                    />
+                                )}
+                                radius={[4, 4, 0, 0]}
+                            />
                         </BarChart>
                     </ResponsiveContainer>
                 </Paper>
+                <Paper sx={{ p: 3 }}>
+                    <Typography variant="subtitle1" sx={{ mb: 2 }}>
+                        Applications Over Time
+                    </Typography>
+                    <ResponsiveContainer width="100%" height={280}>
+                        <AreaChart data={overTime}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#D8DCE5" />
+                            <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+                            <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+                            <Tooltip />
+                            <Area type="monotone" dataKey="count" stroke="#3D4B94" fill="#3D4B94" fillOpacity={0.15} />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </Paper>
             </Box>
+            {topCompanies.length > 0 && (
+                <Paper sx={{ p: 3 }}>
+                    <Typography variant="subtitle1" sx={{ mb: 2 }}>
+                        Top Companies
+                    </Typography>
+                    <ResponsiveContainer width="100%" height={240}>
+                        <BarChart data={topCompanies} layout="vertical" margin={{ left: 24 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#D8DCE5" />
+                            <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12 }} />
+                            <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 12 }} />
+                            <Tooltip />
+                            <Bar dataKey="count" fill="#3D4B94" radius={[0, 4, 4, 0]} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </Paper>
+            )}
         </Container>
     );
 }

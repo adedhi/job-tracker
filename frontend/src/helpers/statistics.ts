@@ -45,7 +45,7 @@ export function computeApplicationsOverTime(applications: ApplicationResponse[])
     return [...counts.keys()].sort().map((key) => {
         const [year, month] = key.split("-");
         const label = new Date(Number(year), Number(month) - 1).toLocaleDateString(undefined, {
-            year: "2-digit",
+            year: "numeric",
             month: "short"
         });
         return { label, count: counts.get(key)! };
