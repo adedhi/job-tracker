@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useCallback, useState } from 'react';
+import { createContext, ReactNode, useCallback, useRef, useState } from 'react';
 import {
     ApplicationResponse, CompanyResponse, CompanyWithApplicationsResponse,
     CreateApplicationPayload, CreateCompanyPayload, UpdateApplicationPayload,
@@ -29,19 +29,19 @@ export const DemoContext = createContext<DemoContextType | undefined>(undefined)
 // Replicates the backend/database CRUD operations in React state
 export function DemoProvider({ children }: { children: ReactNode }) {
     const [isDemoMode, setIsDemoMode] = useState(false);
-    const [applications, setApplications] = useState<ApplicationResponse[]>([]);
-    const [companies, setCompanies] = useState<CompanyResponse[]>([]);
+    const applications = useRef<ApplicationResponse[]>([]);
+    const companies = useRef<CompanyResponse[]>([]);
 
     const enterDemoMode = useCallback(() => {
-        setCompanies(getSeedCompanies());
-        setApplications(getSeedApplications());
+        companies.current = getSeedCompanies();
+        applications.current = getSeedApplications();
         setIsDemoMode(true);
     }, []);
 
     const exitDemoMode = useCallback(() => {
         setIsDemoMode(false);
-        setCompanies([]);
-        setApplications([]);
+        companies.current = [];
+        applications.current = [];
     }, []);
 
     function attachCompany(app: ApplicationResponse, companyList: CompanyResponse[]): ApplicationResponse {
@@ -52,13 +52,20 @@ export function DemoProvider({ children }: { children: ReactNode }) {
         return { ...company, applications: appList.filter((app) => app.companyId === company.id) };
     }
 
-    const fetchApplications = useCallback(async () => applications, [applications]);
+    function assertUniqueName(name: string, excludeId?: string) {
+        const existingCompany = companies.current.some(
+            (company) => company.id !== excludeId && company.name.trim().toLowerCase() === name.trim().toLowerCase()
+        );
+        if (existingCompany) throw new Error("You already have a company with this name");
+    }
+
+    const fetchApplications = useCallback(async () => applications.current, []);
 
     const fetchApplication = useCallback(async (id: string) => {
-        const application = applications.find((app) => app.id === id);
+        const application = applications.current.find((app) => app.id === id);
         if (!application) throw new Error("Application not found");
         return application
-    }, [applications]);
+    }, []);
 
     const createApplication = useCallback(async (payload: CreateApplicationPayload) => {
         const now = new Date().toISOString();
@@ -72,43 +79,37 @@ export function DemoProvider({ children }: { children: ReactNode }) {
             appliedDate: now,
             updatedAt: now,
         };
-        const withCompany = attachCompany(newApp, companies);
-        setApplications((prev) => [...prev, withCompany]);
+        const withCompany = attachCompany(newApp, companies.current);
+        applications.current = [...applications.current, withCompany];
         return withCompany;
-    }, [companies]);
+    }, []);
 
     const updateApplication = useCallback(async (id: string, payload: UpdateApplicationPayload) => {
-        let updated: ApplicationResponse | undefined;
-        setApplications((prev) => prev.map((app) => {
-            if (app.id !== id) return app;
-            updated = attachCompany({ ...app, ...payload, updatedAt: new Date().toISOString() }, companies);
-            return updated;
-        }));
-        if (!updated) throw new Error("Application not found");
+        const index = applications.current.findIndex((app) => app.id === id);
+        if (index === -1) throw new Error("Application not found");
+
+        const updated = attachCompany(
+            {...applications.current[index], ...payload, updatedAt: new Date().toISOString()},
+            companies.current
+        );
+        applications.current = applications.current.map((app, i) => i === index ? updated : app);
         return updated;
-    }, [companies]);
+    }, []);
 
     const deleteApplication = useCallback(async (id: string) => {
-        setApplications((prev) => prev.filter((app) => app.id !== id));
+        applications.current = applications.current.filter((app) => app.id !== id);
         return { message: "Application deleted" };
     }, []);
 
     const fetchCompanies = useCallback(async () =>
-        companies.map((company) => withApplications(company, applications)),
-        [companies, applications]);
+        companies.current.map((company) => withApplications(company, applications.current)),
+    []);
 
     const fetchCompany = useCallback(async (id: string) => {
-        const company = companies.find((company) => company.id === id);
+        const company = companies.current.find((company) => company.id === id);
         if (!company) throw new Error("Company not found");
-        return withApplications(company, applications);
-    }, [companies, applications]);
-
-    function assertUniqueName(name: string, excludeId?: string) {
-        const existingCompany = companies.some(
-            (company) => company.id !== excludeId && company.name.trim().toLowerCase() === name.trim().toLowerCase()
-        );
-        if (existingCompany) throw new Error("You already have a company with this name");
-    }
+        return withApplications(company, applications.current);
+    }, []);
 
     const createCompany = useCallback(async (payload: CreateCompanyPayload) => {
         assertUniqueName(payload.name);
@@ -116,25 +117,24 @@ export function DemoProvider({ children }: { children: ReactNode }) {
             id: crypto.randomUUID(),
             name: payload.name.trim()
         };
-        setCompanies((prev) => [...prev, newCompany]);
+        companies.current = [...companies.current, newCompany];
         return newCompany;
-    }, [companies]);
+    }, []);
 
     const updateCompany = useCallback(async (id: string, payload: UpdateCompanyPayload) => {
         if (payload.name !== undefined) assertUniqueName(payload.name, id);
-        let updated: CompanyResponse | undefined;
-        setCompanies((prev) => prev.map((company) => {
-            if (company.id !== id) return company;
-            updated = { ...company, ...payload };
-            return updated;
-        }));
-        if (!updated) throw new Error("Company not found");
+
+        const index = companies.current.findIndex((company) => company.id === id);
+        if (index === -1) throw new Error("Company not found");
+
+        const updated = { ...companies.current[index], ...payload };
+        companies.current = companies.current.map((company, i) => i === index ? updated : company);
         return updated;
-    }, [companies]);
+    }, []);
 
     const deleteCompany = useCallback(async (id: string) => {
-        setCompanies((prev) => prev.filter((company) => company.id !== id));
-        setApplications((prev) => prev.map((app) => (app.companyId === id ? { ...app, companyId: null, company: null } : app)));
+        companies.current = companies.current.filter((company) => company.id !== id);
+        applications.current = applications.current.map((app) => (app.companyId === id ? { ...app, companyId: null, company: null } : app));
         return { message: "Company deleted" };
     }, []);
 
