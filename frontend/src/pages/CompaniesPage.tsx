@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
-  Container, Box, Typography, Button, TextField,
-  IconButton, Collapse, Table, TableHead, TableBody,
-  TableRow, TableCell, Chip, InputAdornment, CircularProgress
+  Container, Box, Typography, Button, TextField, IconButton,
+  Collapse, Table, TableHead, TableBody, TableRow, TableCell,
+  TableSortLabel, Chip, InputAdornment, CircularProgress
 } from '@mui/material';
 import { Add, Edit, Delete, Search, ExpandMore, ExpandLess } from '@mui/icons-material';
 import { CompanyWithApplicationsResponse, CompanyResponse, ApplicationResponse } from '@job-tracker/types';
@@ -12,6 +12,11 @@ import { STATUS_COLORS } from '../theme';
 import CompanyDialog from '../components/dialog/CompanyDialog';
 import ApplicationDialog from '../components/dialog/ApplicationDialog';
 import ConfirmDialog from '../components/dialog/ConfirmDialog';
+
+type SortKey = keyof Pick<
+    CompanyWithApplicationsResponse,
+    "name" | "applications"
+>;
 
 export default function CompaniesPage() {
     const { showSnackbar } = useSnackbar();
@@ -24,11 +29,27 @@ export default function CompaniesPage() {
     const [companyDialogOpen, setCompanyDialogOpen] = useState(false);
     const [applicationDialogOpen, setApplicationDialogOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [sortKey, setSortKey] = useState<SortKey>("name");
+    const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
     const filteredCompanies = useMemo(() => {
-        if (!search.trim()) return companies;
-        return companies.filter((company) => company.name.toLowerCase().includes(search.toLowerCase()));
-    }, [companies, search]);
+        let result = companies;
+
+        if (search.trim()) {
+            result = result.filter((company) =>
+                company.name.toLowerCase().includes(search.toLowerCase())
+            );
+        }
+
+        return [...result].sort((a, b) => {
+            let cmp = 0;
+            switch (sortKey) {
+                case "name": cmp = a.name.localeCompare(b.name); break;
+                case "applications": cmp = a.applications.length - b.applications.length; break;
+            }
+            return sortDir === "asc" ? cmp : -cmp;
+        });
+    }, [companies, search, sortKey, sortDir]);
 
     async function loadCompanies() {
         setIsLoading(true);
@@ -37,6 +58,27 @@ export default function CompaniesPage() {
             setCompanies(companies);
         } finally {
             setIsLoading(false);
+        }
+    }
+
+    async function confirmDelete() {
+        if (!companyToDelete) return;
+        try {
+            await deleteCompany(companyToDelete.id);
+            setCompanies((prev) => prev.filter((company) => company.id !== companyToDelete.id));
+            setCompanyToDelete(null);
+            showSnackbar("Company deleted");
+        } catch (error) {
+            showSnackbar(error instanceof Error ? error.message : "Failed to delete company", "error");
+        }
+    }
+
+    function handleSort(key: SortKey) {
+        if (sortKey === key) {
+            setSortDir((dir) => (dir === "asc" ? "desc" : "asc"));
+        } else {
+            setSortKey(key);
+            setSortDir("asc");
         }
     }
 
@@ -54,18 +96,6 @@ export default function CompaniesPage() {
         const applicationWithCompany = {...application, company: { id: company.id, name: company.name }};
         setEditingApplication(applicationWithCompany);
         setApplicationDialogOpen(true);
-    }
-
-    async function confirmDelete() {
-        if (!companyToDelete) return;
-        try {
-            await deleteCompany(companyToDelete.id);
-            setCompanies((prev) => prev.filter((company) => company.id !== companyToDelete.id));
-            setCompanyToDelete(null);
-            showSnackbar("Company deleted");
-        } catch (error) {
-            showSnackbar(error instanceof Error ? error.message : "Failed to delete company", "error");
-        }
     }
 
     useEffect(() => {
@@ -93,7 +123,10 @@ export default function CompaniesPage() {
                 size="small"
                 placeholder="Search companies"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                    setSearch(e.target.value);
+                    setExpandedId(null);
+                }}
                 sx={{ mb: 2, minWidth: 240 }}
                 slotProps={{
                     input: {
@@ -119,13 +152,43 @@ export default function CompaniesPage() {
                     No companies match your search.
                 </Typography>
             ) : (
-                <Table>
+                <Table
+                    sx={{
+                        border: 1,
+                        borderColor:
+                            "divider",
+                            "& th, & td": {
+                                border: 1,
+                                borderColor: "divider"
+                            },
+                            "& th:first-of-type, & td:first-of-type": {
+                                borderRight: "none"
+                            },
+                            "& th:nth-of-type(2), & td:nth-of-type(2)": {
+                                borderLeft: "none"
+                            }
+                    }}
+                >
                     <TableHead>
                         <TableRow>
                             <TableCell />
-                            <TableCell>Name</TableCell>
-                            <TableCell>Applications</TableCell>
-                            <TableCell align="right">Actions</TableCell>
+                            {([
+                                ["name", "Name"],
+                                ["applications", "Applications"]
+                            ] as [SortKey, string][]).map(([key, label]) => (
+                                <TableCell key={key}>
+                                    <TableSortLabel
+                                        active={sortKey === key}
+                                        direction={sortKey === key ? sortDir : "asc"}
+                                        onClick={() => handleSort(key)}
+                                    >
+                                        {label}
+                                    </TableSortLabel>
+                                </TableCell>
+                            ))}
+                            <TableCell align="right">
+                                Actions
+                            </TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>

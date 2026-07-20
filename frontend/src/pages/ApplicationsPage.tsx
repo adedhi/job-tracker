@@ -13,6 +13,7 @@ import ApplicationDialog from '../components/dialog/ApplicationDialog';
 import ConfirmDialog from '../components/dialog/ConfirmDialog';
 
 const STATUSES: ApplicationStatus[] = ["APPLIED", "INTERVIEWING", "REJECTED", "OFFER", "ACCEPTED"];
+
 type SortKey = keyof Pick<
     ApplicationResponse,
     "roleTitle" | "company" | "status" | "appliedDate" | "salary"
@@ -24,11 +25,11 @@ export default function ApplicationsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [activeStatuses, setActiveStatuses] = useState<Set<ApplicationStatus>>(new Set());
-    const [sortKey, setSortKey] = useState<SortKey>("appliedDate");
-    const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editingApplication, setEditingApplication] = useState<ApplicationResponse | null>(null);
     const [appToDelete, setAppToDelete] = useState<string | null>(null);
+    const [sortKey, setSortKey] = useState<SortKey>("appliedDate");
+    const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
     const filteredApplications = useMemo(() => {
         let result = applications;
@@ -49,7 +50,7 @@ export default function ApplicationsPage() {
             switch (sortKey) {
                 case "roleTitle": cmp = a.roleTitle.localeCompare(b.roleTitle); break;
                 case "company": cmp = (a.company?.name ?? "").localeCompare(b.company?.name ?? ""); break;
-                case "status": cmp =a.status.localeCompare(b.status); break;
+                case "status": cmp = a.status.localeCompare(b.status); break;
                 case "appliedDate": cmp = new Date(a.appliedDate).getTime() - new Date(b.appliedDate).getTime(); break;
                 case "salary": cmp = (a.salary ?? "").localeCompare(b.salary ?? ""); break;
             }
@@ -67,6 +68,18 @@ export default function ApplicationsPage() {
         }
     }
 
+    async function confirmDelete() {
+        if (!appToDelete) return;
+        try {
+            await deleteApplication(appToDelete);
+            setApplications((prev) => prev.filter((app) => app.id !== appToDelete));
+            setAppToDelete(null);
+            showSnackbar("Application deleted");
+        } catch (error) {
+            showSnackbar(error instanceof Error ? error.message : "Failed to delete application", "error");
+        }
+    }
+
     function toggleStatus(status: ApplicationStatus) {
         setActiveStatuses((prev) => {
             const next = new Set(prev);
@@ -81,18 +94,6 @@ export default function ApplicationsPage() {
         } else {
             setSortKey(key);
             setSortDir("asc");
-        }
-    }
-
-    async function confirmDelete() {
-        if (!appToDelete) return;
-        try {
-            await deleteApplication(appToDelete);
-            setApplications((prev) => prev.filter((app) => app.id !== appToDelete));
-            setAppToDelete(null);
-            showSnackbar("Application deleted");
-        } catch (error) {
-            showSnackbar(error instanceof Error ? error.message : "Failed to delete application", "error");
         }
     }
 
@@ -165,7 +166,17 @@ export default function ApplicationsPage() {
                     No applications match your filters.
                 </Typography>
             ) : (
-                <Table>
+                <Table
+                    sx={{
+                        border: 1,
+                        borderColor:
+                            "divider",
+                            "& th, & td": {
+                                border: 1,
+                                borderColor: "divider"
+                            }
+                    }}
+                >
                     <TableHead>
                         <TableRow>
                             {([
