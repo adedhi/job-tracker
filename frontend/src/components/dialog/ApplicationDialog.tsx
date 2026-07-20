@@ -5,8 +5,8 @@ import {
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { ApplicationResponse, ApplicationStatus, CompanyResponse } from '@job-tracker/types';
-import { createApplication, updateApplication } from '../../api/applications';
-import { fetchCompanies } from '../../api/companies';
+import { useApplicationsData } from '../../hooks/useApplicationsData';
+import { useCompaniesData } from '../../hooks/useCompaniesData';
 import { useSnackbar } from '../../hooks/useSnackbar';
 import CompanyDialog from './CompanyDialog';
 
@@ -28,6 +28,8 @@ export default function ApplicationDialog({
   onClose: () => void;
   onSaved: () => void;
 }) {
+    const { createApplication, updateApplication } = useApplicationsData();
+    const { fetchCompanies } = useCompaniesData();
     const { showSnackbar } = useSnackbar();
     const [roleTitle, setRoleTitle] = useState("");
     const [status, setStatus] = useState<ApplicationStatus>("APPLIED");

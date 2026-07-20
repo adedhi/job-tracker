@@ -4,7 +4,7 @@ import {
     DialogActions, TextField, Button, Typography
 } from '@mui/material';
 import { CompanyResponse } from '@job-tracker/types';
-import { createCompany, updateCompany } from '../../api/companies';
+import { useCompaniesData } from '../../hooks/useCompaniesData';
 import { useSnackbar } from '../../hooks/useSnackbar';
 
 export default function CompanyDialog({
@@ -20,6 +20,7 @@ export default function CompanyDialog({
     onClose: () => void;
     onSaved: (company: CompanyResponse) => void;
 }) {
+    const { createCompany, updateCompany } = useCompaniesData();
     const { showSnackbar } = useSnackbar();
     const [name, setName] = useState("");
     const [error, setError] = useState<string | null>(null);
