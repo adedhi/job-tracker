@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import { Add, Edit, Delete, Search } from '@mui/icons-material';
 import { ApplicationResponse, ApplicationStatus } from '@job-tracker/types';
-import { fetchApplications, deleteApplication } from '../api/applications';
+import { useApplicationsData } from '../hooks/useApplicationsData';
 import { useSnackbar } from '../hooks/useSnackbar';
 import { STATUS_COLORS } from '../theme';
 import ApplicationDialog from '../components/dialog/ApplicationDialog';
@@ -20,6 +20,7 @@ type SortKey = keyof Pick<
 >;
 
 export default function ApplicationsPage() {
+    const { fetchApplications, deleteApplication } = useApplicationsData();
     const { showSnackbar } = useSnackbar();
     const [applications, setApplications] = useState<ApplicationResponse[]>([]);
     const [isLoading, setIsLoading] = useState(true);

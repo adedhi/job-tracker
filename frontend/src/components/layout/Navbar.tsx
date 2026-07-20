@@ -10,6 +10,7 @@ import {
     Typography
 } from '@mui/material';
 import { useAuth } from '../../hooks/useAuth';
+import DemoBanner from '../../components/demo/DemoBanner';
 
 const NAV_ITEMS = [
     { label: "Applications", path: "/" },
@@ -18,9 +19,9 @@ const NAV_ITEMS = [
 ];
 
 export default function Navbar() {
-    const { user, logout, isLoading } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+    const { user, logout, isLoading } = useAuth();
 
     const currentTab = NAV_ITEMS.some((item) => item.path === location.pathname)
         ? location.pathname
@@ -69,6 +70,7 @@ export default function Navbar() {
                         </Button>
                     </Box>
                 ) : null}
+                <DemoBanner />
             </Toolbar>
         </AppBar>
     );

@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import { Add, Edit, Delete, Search, ExpandMore, ExpandLess } from '@mui/icons-material';
 import { CompanyWithApplicationsResponse, CompanyResponse, ApplicationResponse } from '@job-tracker/types';
-import { fetchCompanies, deleteCompany } from '../api/companies';
+import { useCompaniesData } from '../hooks/useCompaniesData';
 import { useSnackbar } from '../hooks/useSnackbar';
 import { STATUS_COLORS } from '../theme';
 import CompanyDialog from '../components/dialog/CompanyDialog';
@@ -19,6 +19,7 @@ type SortKey = keyof Pick<
 >;
 
 export default function CompaniesPage() {
+    const { fetchCompanies, deleteCompany } = useCompaniesData();
     const { showSnackbar } = useSnackbar();
     const [companies, setCompanies] = useState<CompanyWithApplicationsResponse[]>([]);
     const [search, setSearch] = useState("");

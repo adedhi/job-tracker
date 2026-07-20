@@ -1,9 +1,11 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { Box, CircularProgress } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
+import { useDemoMode } from '../hooks/useDemoMode';
 
 export default function ProtectedRoute() {
     const { user, isLoading } = useAuth();
+    const { isDemoMode } = useDemoMode();
 
     if (isLoading) {
         return (
@@ -20,7 +22,7 @@ export default function ProtectedRoute() {
         );
     }
 
-    if (!user) {
+    if (!user && !isDemoMode) {
         return <Navigate to="/login" replace />;
     }
 

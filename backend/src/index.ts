@@ -9,6 +9,14 @@ import { startSessionCleanup } from './helpers/cleanup.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const requiredEnvVars = ["DATABASE_URL", "FRONTEND_URL"];
+const missingVars = requiredEnvVars.filter((key) => !process.env[key]);
+
+if (missingVars.length > 0) {
+    console.error(`Missing required environment variables: ${missingVars.join(", ")}`);
+    process.exit(1);
+}
+
 app.set('trust proxy', 1);
 app.use(cors({
     origin: process.env.FRONTEND_URL,

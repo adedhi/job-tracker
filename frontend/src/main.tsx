@@ -6,6 +6,7 @@ import './index.css';
 import App from './App.tsx';
 import { theme } from './theme';
 import { AuthProvider } from './context/AuthContext.tsx';
+import { DemoProvider } from './context/DemoContext.tsx';
 import { SnackbarProvider } from './context/SnackbarContext.tsx';
 
 createRoot(document.getElementById('root')!).render(
@@ -13,11 +14,13 @@ createRoot(document.getElementById('root')!).render(
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <SnackbarProvider>
-        <BrowserRouter>
-          <AuthProvider>
-            <App />
-          </AuthProvider>
-        </BrowserRouter>
+        <DemoProvider>
+          <BrowserRouter>
+            <AuthProvider>
+              <App />
+            </AuthProvider>
+          </BrowserRouter>
+        </DemoProvider>
       </SnackbarProvider>
     </ThemeProvider>
   </StrictMode>,

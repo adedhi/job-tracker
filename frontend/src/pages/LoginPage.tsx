@@ -11,10 +11,11 @@ import {
     Typography
 } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
+import DemoButton from '../components/demo/DemoButton';
 
 export default function LoginPage() {
-    const { login } = useAuth();
     const navigate = useNavigate();
+    const { login } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
@@ -90,6 +91,7 @@ export default function LoginPage() {
                             Register
                         </Link>
                     </Typography>
+                    <DemoButton />
                 </Box>
             </Paper>
         </Container>

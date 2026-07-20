@@ -5,7 +5,7 @@ import {
   Tooltip, ResponsiveContainer, Rectangle
 } from 'recharts';
 import { ApplicationResponse, ApplicationStatus } from '@job-tracker/types';
-import { fetchApplications } from '../api/applications';
+import { useApplicationsData } from '../hooks/useApplicationsData';
 import { STATUS_COLORS } from '../theme';
 import {
   computeStatusCounts, computeResponseRate, computeActiveCount,
@@ -24,6 +24,7 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
 }
 
 export default function StatisticsPage() {
+    const { fetchApplications } = useApplicationsData();
     const [applications, setApplications] = useState<ApplicationResponse[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
