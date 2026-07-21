@@ -167,75 +167,77 @@ export default function ApplicationsPage() {
                     No applications match your filters.
                 </Typography>
             ) : (
-                <Table
-                    sx={{
-                        border: 1,
-                        borderColor:
-                            "divider",
-                            "& th, & td": {
-                                border: 1,
-                                borderColor: "divider"
-                            }
-                    }}
-                >
-                    <TableHead>
-                        <TableRow>
-                            {([
-                                ["roleTitle", "Role"],
-                                ["company", "Company"],
-                                ["status", "Status"],
-                                ["appliedDate", "Applied"],
-                                ["salary", "Salary"]
-                            ] as [SortKey, string][]).map(([key, label]) => (
-                                <TableCell key={key}>
-                                    <TableSortLabel
-                                        active={sortKey === key}
-                                        direction={sortKey === key ? sortDir : "asc"}
-                                        onClick={() => handleSort(key)}
-                                    >
-                                        {label}
-                                    </TableSortLabel>
-                                </TableCell>
-                            ))}
-                            <TableCell align="right">
-                                Actions
-                            </TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {filteredApplications.map((app) => (
-                            <TableRow key={app.id}>
-                                <TableCell>{app.roleTitle}</TableCell>
-                                <TableCell>{app.company?.name ?? '—'}</TableCell>
-                                <TableCell>
-                                    <Chip
-                                        size="small"
-                                        label={app.status}
-                                        sx={{
-                                            bgcolor: STATUS_COLORS[app.status],
-                                            color: "#FFF",
-                                            fontWeight: 500
-                                        }}
-                                    />
-                                </TableCell>
-                                <TableCell sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.85rem" }}>
-                                    {new Date(app.appliedDate).toLocaleDateString()}
-                                </TableCell>
-                                <TableCell sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.85rem" }}>
-                                    {app.salary ?? '—'}
-                                </TableCell>
-                                <TableCell align="right" onClick={(e) => e.stopPropagation()}>
-                                    <IconButton size="small" onClick={() => openEditDialog(app)}>
-                                        <Edit fontSize="small" />
-                                    </IconButton>
-                                    <IconButton size="small" onClick={() => setAppToDelete(app.id)}>
-                                        <Delete fontSize="small" />
-                                    </IconButton>
+                <Box sx={{ overflow: "auto", width: "100%" }}>
+                    <Table
+                        sx={{
+                            border: 1,
+                            borderColor:
+                                "divider",
+                                "& th, & td": {
+                                    border: 1,
+                                    borderColor: "divider"
+                                }
+                        }}
+                    >
+                        <TableHead>
+                            <TableRow>
+                                {([
+                                    ["roleTitle", "Role"],
+                                    ["company", "Company"],
+                                    ["status", "Status"],
+                                    ["appliedDate", "Applied"],
+                                    ["salary", "Salary"]
+                                ] as [SortKey, string][]).map(([key, label]) => (
+                                    <TableCell key={key}>
+                                        <TableSortLabel
+                                            active={sortKey === key}
+                                            direction={sortKey === key ? sortDir : "asc"}
+                                            onClick={() => handleSort(key)}
+                                        >
+                                            {label}
+                                        </TableSortLabel>
+                                    </TableCell>
+                                ))}
+                                <TableCell align="right">
+                                    Actions
                                 </TableCell>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                        </TableHead>
+                        <TableBody>
+                            {filteredApplications.map((app) => (
+                                <TableRow key={app.id}>
+                                    <TableCell>{app.roleTitle}</TableCell>
+                                    <TableCell>{app.company?.name ?? '—'}</TableCell>
+                                    <TableCell>
+                                        <Chip
+                                            size="small"
+                                            label={app.status}
+                                            sx={{
+                                                bgcolor: STATUS_COLORS[app.status],
+                                                color: "#FFF",
+                                                fontWeight: 500
+                                            }}
+                                        />
+                                    </TableCell>
+                                    <TableCell sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.85rem" }}>
+                                        {new Date(app.appliedDate).toLocaleDateString()}
+                                    </TableCell>
+                                    <TableCell sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.85rem" }}>
+                                        {app.salary ?? '—'}
+                                    </TableCell>
+                                    <TableCell align="right" onClick={(e) => e.stopPropagation()}>
+                                        <IconButton size="small" onClick={() => openEditDialog(app)}>
+                                            <Edit fontSize="small" />
+                                        </IconButton>
+                                        <IconButton size="small" onClick={() => setAppToDelete(app.id)}>
+                                            <Delete fontSize="small" />
+                                        </IconButton>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </Box>
             )}
             <ApplicationDialog
                 open={dialogOpen}

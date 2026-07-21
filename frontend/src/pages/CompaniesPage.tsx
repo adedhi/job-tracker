@@ -153,117 +153,119 @@ export default function CompaniesPage() {
                     No companies match your search.
                 </Typography>
             ) : (
-                <Table
-                    sx={{
-                        border: 1,
-                        borderColor:
-                            "divider",
-                            "& th, & td": {
-                                border: 1,
-                                borderColor: "divider"
-                            },
-                            "& th:first-of-type, & td:first-of-type": {
-                                borderRight: "none"
-                            },
-                            "& th:nth-of-type(2), & td:nth-of-type(2)": {
-                                borderLeft: "none"
-                            }
-                    }}
-                >
-                    <TableHead>
-                        <TableRow>
-                            <TableCell />
-                            {([
-                                ["name", "Name"],
-                                ["applications", "Applications"]
-                            ] as [SortKey, string][]).map(([key, label]) => (
-                                <TableCell key={key}>
-                                    <TableSortLabel
-                                        active={sortKey === key}
-                                        direction={sortKey === key ? sortDir : "asc"}
-                                        onClick={() => handleSort(key)}
-                                    >
-                                        {label}
-                                    </TableSortLabel>
+                <Box sx={{ overflow: "auto", width: "100%" }}>
+                    <Table
+                        sx={{
+                            border: 1,
+                            borderColor:
+                                "divider",
+                                "& th, & td": {
+                                    border: 1,
+                                    borderColor: "divider"
+                                },
+                                "& th:first-of-type, & td:first-of-type": {
+                                    borderRight: "none"
+                                },
+                                "& th:nth-of-type(2), & td:nth-of-type(2)": {
+                                    borderLeft: "none"
+                                }
+                        }}
+                    >
+                        <TableHead>
+                            <TableRow>
+                                <TableCell />
+                                {([
+                                    ["name", "Name"],
+                                    ["applications", "Applications"]
+                                ] as [SortKey, string][]).map(([key, label]) => (
+                                    <TableCell key={key}>
+                                        <TableSortLabel
+                                            active={sortKey === key}
+                                            direction={sortKey === key ? sortDir : "asc"}
+                                            onClick={() => handleSort(key)}
+                                        >
+                                            {label}
+                                        </TableSortLabel>
+                                    </TableCell>
+                                ))}
+                                <TableCell align="right">
+                                    Actions
                                 </TableCell>
-                            ))}
-                            <TableCell align="right">
-                                Actions
-                            </TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {filteredCompanies.map((company) => {
-                            const isExpanded = expandedId === company.id;
-                            return (
-                                <>
-                                    <TableRow key={company.id} hover>
-                                        <TableCell sx={{ width: 48 }}>
-                                            {company.applications.length > 0 && (
-                                                <IconButton size="small" onClick={() => setExpandedId(isExpanded ? null : company.id)}>
-                                                    {isExpanded ? <ExpandLess /> : <ExpandMore />}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {filteredCompanies.map((company) => {
+                                const isExpanded = expandedId === company.id;
+                                return (
+                                    <>
+                                        <TableRow key={company.id} hover>
+                                            <TableCell sx={{ width: 48 }}>
+                                                {company.applications.length > 0 && (
+                                                    <IconButton size="small" onClick={() => setExpandedId(isExpanded ? null : company.id)}>
+                                                        {isExpanded ? <ExpandLess /> : <ExpandMore />}
+                                                    </IconButton>
+                                                )}
+                                            </TableCell>
+                                            <TableCell>{company.name}</TableCell>
+                                            <TableCell>{company.applications.length}</TableCell>
+                                            <TableCell align="right">
+                                                <IconButton size="small" onClick={() => openEditDialog(company)}>
+                                                    <Edit fontSize="small" />
                                                 </IconButton>
-                                            )}
-                                        </TableCell>
-                                        <TableCell>{company.name}</TableCell>
-                                        <TableCell>{company.applications.length}</TableCell>
-                                        <TableCell align="right">
-                                            <IconButton size="small" onClick={() => openEditDialog(company)}>
-                                                <Edit fontSize="small" />
-                                            </IconButton>
-                                            <IconButton size="small" onClick={() => setCompanyToDelete(company)}>
-                                                <Delete fontSize="small" />
-                                            </IconButton>
-                                        </TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell colSpan={4} sx={{ p: 0, border: isExpanded ? undefined : "none" }}>
-                                            <Collapse in={isExpanded} unmountOnExit>
-                                                <Box sx={{ px: 4, py: 2, bgcolor: "background.default" }}>
-                                                    {company.applications.map((app) => (
-                                                        <Box
-                                                            key={app.id}
-                                                            onClick={() => openApplicationDialog(app, company)}
-                                                            sx={{
-                                                                display: "flex",
-                                                                alignItems: "center",
-                                                                gap: 2,
-                                                                py: 1,
-                                                                cursor: "pointer",
-                                                                "&:hover": { opacity: 0.7 }
-                                                            }}
-                                                        >
-                                                            <Chip
-                                                                size="small"
-                                                                label={app.status}
+                                                <IconButton size="small" onClick={() => setCompanyToDelete(company)}>
+                                                    <Delete fontSize="small" />
+                                                </IconButton>
+                                            </TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell colSpan={4} sx={{ p: 0, border: isExpanded ? undefined : "none" }}>
+                                                <Collapse in={isExpanded} unmountOnExit>
+                                                    <Box sx={{ px: 4, py: 2, bgcolor: "background.default" }}>
+                                                        {company.applications.map((app) => (
+                                                            <Box
+                                                                key={app.id}
+                                                                onClick={() => openApplicationDialog(app, company)}
                                                                 sx={{
-                                                                    bgcolor: STATUS_COLORS[app.status],
-                                                                    color: "#fff",
-                                                                    minWidth: 100
-                                                                }}
-                                                            />
-                                                            <Typography variant="body2">{app.roleTitle}</Typography>
-                                                            <Typography
-                                                                variant="body2"
-                                                                color="text.secondary"
-                                                                sx={{
-                                                                    ml: "auto",
-                                                                    fontFamily: '"IBM Plex Mono", monospace'
+                                                                    display: "flex",
+                                                                    alignItems: "center",
+                                                                    gap: 2,
+                                                                    py: 1,
+                                                                    cursor: "pointer",
+                                                                    "&:hover": { opacity: 0.7 }
                                                                 }}
                                                             >
-                                                                {new Date(app.appliedDate).toLocaleDateString()}
-                                                            </Typography>
-                                                        </Box>
-                                                    ))}
-                                                </Box>
-                                            </Collapse>
-                                        </TableCell>
-                                    </TableRow>
-                                </>
-                            );
-                        })}
-                    </TableBody>
-                </Table>
+                                                                <Chip
+                                                                    size="small"
+                                                                    label={app.status}
+                                                                    sx={{
+                                                                        bgcolor: STATUS_COLORS[app.status],
+                                                                        color: "#fff",
+                                                                        minWidth: 100
+                                                                    }}
+                                                                />
+                                                                <Typography variant="body2">{app.roleTitle}</Typography>
+                                                                <Typography
+                                                                    variant="body2"
+                                                                    color="text.secondary"
+                                                                    sx={{
+                                                                        ml: "auto",
+                                                                        fontFamily: '"IBM Plex Mono", monospace'
+                                                                    }}
+                                                                >
+                                                                    {new Date(app.appliedDate).toLocaleDateString()}
+                                                                </Typography>
+                                                            </Box>
+                                                        ))}
+                                                    </Box>
+                                                </Collapse>
+                                            </TableCell>
+                                        </TableRow>
+                                    </>
+                                );
+                            })}
+                        </TableBody>
+                    </Table>
+                </Box>
             )}
             <CompanyDialog
                 open={companyDialogOpen}

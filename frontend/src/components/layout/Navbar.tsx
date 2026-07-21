@@ -90,7 +90,7 @@ export default function Navbar() {
                                 </>
                             )}
                         </Box>
-                    ) : (
+                    ) : (isMobile || !isDemoMode) ? (
                         <Box sx={{ display: "flex", alignItems: "center", gap: isMobile ? 0 : 2 }}>
                             <Typography variant="body2">
                                 {user ? user.email : "Demo"}
@@ -105,16 +105,7 @@ export default function Navbar() {
                                 </Button>
                             )}
                         </Box>
-                    )}
-                    {(user || isDemoMode) && (
-                        <Box sx={{ display: "flex", alignItems: "center", gap: isMobile ? 0 : 2 }}>
-                            {!isMobile && (
-                                <Typography variant="body2">
-                                    {user ? user.email : "Demo"}
-                                </Typography>
-                            )}
-                        </Box>
-                    )}
+                    ) : null}
                     {!isMobile && <DemoBanner />}
                 </Toolbar>
             </AppBar>
