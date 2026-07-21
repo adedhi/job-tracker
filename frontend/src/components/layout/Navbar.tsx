@@ -42,7 +42,7 @@ export default function Navbar() {
                     value={currentTab}
                     textColor="inherit"
                     indicatorColor="secondary"
-                    sx={{ flexGrow: 1 }}
+                    sx={{ flexGrow: 1, minWidth: "fit-content" }}
                 >
                     {NAV_ITEMS.map((item) => (
                         <Tab

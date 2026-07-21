@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Button, Typography } from '@mui/material';
 import { useDemoMode } from '../../hooks/useDemoMode';
 
-export default function DemoButton() {
+export default function DemoBanner() {
     const navigate = useNavigate();
     const { isDemoMode, exitDemoMode } = useDemoMode();
 
@@ -20,10 +20,12 @@ export default function DemoButton() {
                 justifyContent: "center",
                 alignItems: "center",
                 gap: "5px",
+                width: "100%",
+                maxWidth: "fit-content",
                 px: 2,
                 py: 0.5,
                 bgcolor: "#C98A2C",
-                color: "#fff"
+                color: "#fff",
             }}
         >
             <Typography variant="body2">

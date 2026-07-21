@@ -74,7 +74,7 @@ export default function RegisterPage() {
                         error={password.length > 0 && password.length < 8}
                         helperText={
                             password.length > 0 && password.length < 8
-                                ? `${8 - password.length} more character${8 - password.length === 1 ? '' : 's'} needed`
+                                ? `${8 - password.length} more character${8 - password.length === 1 ? "" : "s"} needed`
                                 : "At least 8 characters"
                         }
                     />
