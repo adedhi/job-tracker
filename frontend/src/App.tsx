@@ -6,6 +6,7 @@ import RegisterPage from './pages/RegisterPage';
 import ApplicationsPage from './pages/ApplicationsPage';
 import CompaniesPage from './pages/CompaniesPage';
 import StatisticsPage from './pages/StatisticsPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/companies" element={<CompaniesPage />} />
           <Route path="/statistics" element={<StatisticsPage />} />
         </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
   );
