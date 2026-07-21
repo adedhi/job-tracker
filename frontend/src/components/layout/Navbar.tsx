@@ -81,13 +81,11 @@ export default function Navbar() {
                     )}
                     {isLoading ? (
                         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                            <Skeleton variant="text" width={150} sx={{ bgcolor: "#ffffff33" }} />
                             {isMobile ? (
                                 <Skeleton variant="rounded" width={24} height={24} sx={{ bgcolor: "#ffffff33" }} />
                             ) : (
-                                <>
-                                    <Skeleton variant="text" width={150} sx={{ bgcolor: "#ffffff33" }} />
-                                    <Skeleton variant="rounded" width={80} height={36} sx={{ bgcolor: "#ffffff33" }} />
-                                </>
+                                <Skeleton variant="rounded" width={80} height={36} sx={{ bgcolor: "#ffffff33" }} />
                             )}
                         </Box>
                     ) : (isMobile || !isDemoMode) ? (
