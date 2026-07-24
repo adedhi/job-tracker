@@ -6,9 +6,9 @@ A full-stack application for tracking job applications — replacing the spreads
 
 > Note: the backend runs on Render's free tier, which spins down after inactivity — the first request after a period of idleness may take 30–60 seconds to respond while the server wakes up.
 
-<!-- ADD SCREENSHOTS HERE -->
-<!-- ![Applications page](docs/screenshots/applications.png) -->
-<!-- ![Statistics page](docs/screenshots/statistics.png) -->
+![Applications page](docs/screenshots/applications.png)
+
+![Statistics page](docs/screenshots/statistics.png)
 
 ## Features
 
