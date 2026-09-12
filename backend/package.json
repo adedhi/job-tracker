@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "email:dev": "email dev --dir src/email/templates"
   },
   "keywords": [],
   "author": "",
@@ -20,10 +21,13 @@
     "express-rate-limit": "^8.6.0",
     "node-cron": "^4.6.0",
     "pg": "^8.22.0",
+    "resend": "^6.28.0",
     "typescript": "^6.0.3"
   },
   "devDependencies": {
     "@prisma/client": "^7.8.0",
+    "@react-email/components": "^1.0.12",
+    "@react-email/ui": "^6.9.5",
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
@@ -32,6 +36,7 @@
     "@types/node-cron": "^3.0.11",
     "@types/pg": "^8.20.0",
     "prisma": "^7.8.0",
+    "react-email": "^6.9.5",
     "tsx": "^4.23.0"
   }
 }

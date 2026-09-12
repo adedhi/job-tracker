@@ -1,6 +1,6 @@
 # Job Tracker
 
-A full-stack application for tracking job applications — replacing the spreadsheet most people default to during a job search with something built for the job: sortable/filterable views, company management, and pipeline statistics.
+A full-stack application for tracking job applications. Replaces the spreadsheet most people default to during a job search with something built for the job: sortable/filterable views, company management, and pipeline statistics.
 
 **Live app:** [job-tracker-frontend-silk.vercel.app](https://job-tracker-frontend-silk.vercel.app)
 
@@ -13,6 +13,7 @@ A full-stack application for tracking job applications — replacing the spreads
 ## Features
 
 - **Authentication** — email/password registration and login, with server-side sessions (not JWTs) stored in Postgres and referenced via an httpOnly cookie
+- **Email verification** - new accounts receive a verification email (via [Resend](https://resend.com)); verification is not required to use the app, but gates features (e.g., email digests) to confirmed addresses
 - **Applications** — create, edit, delete, search, filter by status, and sort by any column
 - **Companies** — manage companies independently, or create one inline while adding an application, with per-user uniqueness enforced on company names
 - **Statistics** — pipeline breakdown by stage, applications over time, response rate, and top companies, computed client-side from application data
@@ -30,7 +31,19 @@ A full-stack application for tracking job applications — replacing the spreads
 
 ## Why session-based auth, not JWT
 
-This was a deliberate choice, not a default: with a single Express instance and a database already in place via Prisma, sessions give instant revocation (delete the row, the session is dead everywhere) and no token refresh/expiry logic to build — at the cost of a DB lookup per authenticated request, which is a fine tradeoff at this scale. See [`backend/src/middleware/require-auth.ts`](backend/src/middleware/require-auth.ts) for the implementation.
+This project uses server-side sessions instead of JWTs. The backend already runs a single Express instance backed by Postgres through Prisma, so a database was available for session storage without adding anything new to the stack. Sessions can be revoked instantly and deleting the row ends that session everywhere, on every device, with no waiting for a token to expire. There's also no refresh-token logic to design or maintain, since a session's lifetime is just how long its row is allowed to live.
+
+The tradeoff is a database lookup on every authenticated request. However, at this scale that cost is negligible, and the app is already hitting Postgres for nearly everything else it does, so it's just adding one more query to an existing one. See [`backend/src/middleware/require-auth.ts`](backend/src/middleware/require-auth.ts) for the implementation.
+
+## Email Verification
+
+New users receive a verification email on registration, sent via [Resend](https://resend.com). Verification isn't required to use the app today; it exists to gate features (like email digests) to confirmed addresses.
+
+- Verification links are single-use and expire after 24 hours.
+- Expired, unused tokens are cleaned up nightly via a scheduled job (see [`backend/src/helpers/cleanup.ts`](backend/src/helpers/cleanup.ts)).
+- A "resend verification email" flow is planned but not yet implemented. Currently, an expired or lost link has no self-serve recovery.
+
+**Known limitation:** email sending uses Resend's sandbox sender (`onboarding@resend.dev`), since this project doesn't use a custom domain. As a result, verification emails only deliver to the developer's own Resend account address. Other users can register normally, but won't receive a real verification email until a verified sending domain is configured.
 
 ## Project structure
 
@@ -61,8 +74,8 @@ npm install
 ```
 DATABASE_URL=postgresql://...
 FRONTEND_URL=http://localhost:5173
-NODE_ENV=development
-PORT=3000
+RESEND_API_KEY="Resend api key..."
+EMAIL_FROM_ADDRESS="email@..."
 ```
 
 Build the shared types package and run migrations:
@@ -91,10 +104,11 @@ All routes except `/api/auth/register` and `/api/auth/login` require an authenti
 
 | Method | Route | Description |
 |---|---|---|
+| GET | `/api/auth/me` | Returns the current user, if authenticated |
+| GET | `/api/auth/verify-email` | Verifies an account using the token from the verification email |
 | POST | `/api/auth/register` | Create an account, starts a session |
 | POST | `/api/auth/login` | Authenticate, starts a session |
 | POST | `/api/auth/logout` | Ends the current session |
-| GET | `/api/auth/me` | Returns the current user, if authenticated |
 | GET | `/api/applications` | List the user's applications |
 | POST | `/api/applications` | Create an application |
 | PATCH | `/api/applications/:id` | Update an application |

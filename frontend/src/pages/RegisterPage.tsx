@@ -13,6 +13,8 @@ import {
 import { useAuth } from '../hooks/useAuth';
 import DemoButton from '../components/demo/DemoButton';
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function RegisterPage() {
     const navigate = useNavigate();
     const { register } = useAuth();
@@ -20,7 +22,8 @@ export default function RegisterPage() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const isFormValid = email.trim().length > 0 && password.length >= 8;
+    const isEmailValid = email.length === 0 || EMAIL_REGEX.test(email);
+    const isFormValid = email.trim().length > 0 && EMAIL_REGEX.test(email) && password.length >= 8;
 
     async function handleSubmit(e: SubmitEvent) {
         e.preventDefault();
@@ -59,6 +62,12 @@ export default function RegisterPage() {
                         fullWidth
                         margin="normal"
                         autoComplete="email"
+                        error={email.length > 0 && !isEmailValid}
+                        helperText={
+                            email.length > 0 && !isEmailValid
+                                ? "Enter a valid email address"
+                                : ""
+                        }
                     />
                     <TextField
                         id="password"
