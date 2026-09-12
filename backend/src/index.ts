@@ -4,12 +4,12 @@ import cookieParser from 'cookie-parser';
 import authRouter from './routers/auth-router.js';
 import applicationRouter from './routers/application-router.js';
 import companyRouter from './routers/company-router.js';
-import { startSessionCleanup } from './helpers/cleanup.js';
+import { startSessionCleanup, startVerificationTokenCleanup } from './helpers/cleanup.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const requiredEnvVars = ["DATABASE_URL", "FRONTEND_URL"];
+const requiredEnvVars = ["DATABASE_URL", "FRONTEND_URL", "RESEND_API_KEY", "EMAIL_FROM_ADDRESS"];
 const missingVars = requiredEnvVars.filter((key) => !process.env[key]);
 
 if (missingVars.length > 0) {
@@ -33,4 +33,5 @@ app.get('/api/health', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
     startSessionCleanup();
+    startVerificationTokenCleanup();
 });
