@@ -220,7 +220,7 @@ export default function ApplicationsPage() {
                                         />
                                     </TableCell>
                                     <TableCell sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.85rem" }}>
-                                        {new Date(app.appliedDate).toLocaleDateString()}
+                                        {new Date(app.appliedDate).toLocaleDateString(undefined, { timeZone: "UTC" })}
                                     </TableCell>
                                     <TableCell sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.85rem" }}>
                                         {app.salary ?? '—'}

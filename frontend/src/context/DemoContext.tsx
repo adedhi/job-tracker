@@ -76,7 +76,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
             jobUrl: payload.jobUrl ?? null,
             salary: payload.salary ?? null,
             companyId: payload.companyId ?? null,
-            appliedDate: now,
+            appliedDate: payload.appliedDate ?? now,
             updatedAt: now,
         };
         const withCompany = attachCompany(newApp, companies.current);

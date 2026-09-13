@@ -252,7 +252,7 @@ export default function CompaniesPage() {
                                                                         fontFamily: '"IBM Plex Mono", monospace'
                                                                     }}
                                                                 >
-                                                                    {new Date(app.appliedDate).toLocaleDateString()}
+                                                                    {new Date(app.appliedDate).toLocaleDateString(undefined, { timeZone: "UTC" })}
                                                                 </Typography>
                                                             </Box>
                                                         ))}

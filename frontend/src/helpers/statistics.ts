@@ -38,7 +38,7 @@ export function computeApplicationsOverTime(applications: ApplicationResponse[])
 
     applications.forEach((app) => {
         const date = new Date(app.appliedDate);
-        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+        const key = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
         counts.set(key, (counts.get(key) ?? 0) + 1);
     });
 
@@ -46,7 +46,8 @@ export function computeApplicationsOverTime(applications: ApplicationResponse[])
         const [year, month] = key.split("-");
         const label = new Date(Number(year), Number(month) - 1).toLocaleDateString(undefined, {
             year: "numeric",
-            month: "short"
+            month: "short",
+            timeZone: "UTC"
         });
         return { label, count: counts.get(key)! };
     });
