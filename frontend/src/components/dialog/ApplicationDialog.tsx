@@ -1,9 +1,11 @@
 import { useState, useEffect, SubmitEvent } from 'react';
+import dayjs, { Dayjs } from 'dayjs';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, TextField,
   Button, MenuItem, Autocomplete, Box, Typography, createFilterOptions
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
+import { DatePicker } from '@mui/x-date-pickers';
 import { ApplicationResponse, ApplicationStatus, CompanyResponse } from '@job-tracker/types';
 import { useApplicationsData } from '../../hooks/useApplicationsData';
 import { useCompaniesData } from '../../hooks/useCompaniesData';
@@ -35,6 +37,7 @@ export default function ApplicationDialog({
     const [status, setStatus] = useState<ApplicationStatus>("APPLIED");
     const [jobUrl, setJobUrl] = useState("");
     const [salary, setSalary] = useState("");
+    const [appliedDate, setAppliedDate] = useState<Dayjs | null>(dayjs());
     const [companies, setCompanies] = useState<CompanyResponse[]>([]);
     const [selectedCompany, setSelectedCompany] = useState<CompanyResponse | null>(null);
     const [companyInput, setCompanyInput] = useState("");
@@ -83,6 +86,7 @@ export default function ApplicationDialog({
             status,
             jobUrl: jobUrl.trim() || undefined,
             salary: salary.trim() || undefined,
+            appliedDate: appliedDate?.format("YYYY-MM-DD"),
             companyId: selectedCompany?.id
         };
 
@@ -109,6 +113,7 @@ export default function ApplicationDialog({
         setStatus(application?.status ?? "APPLIED");
         setJobUrl(application?.jobUrl ?? "");
         setSalary(application?.salary ?? "");
+        setAppliedDate(application?.appliedDate ? dayjs(application.appliedDate) : dayjs());
         setSelectedCompany(application?.company ?? null);
         setCompanyInput(application?.company?.name ?? "");
         setError(null);
@@ -203,6 +208,13 @@ export default function ApplicationDialog({
                             onChange={(e) => setSalary(e.target.value)}
                             fullWidth
                             placeholder="e.g. $100,000"
+                        />
+                        <DatePicker
+                            label="Applied date"
+                            value={appliedDate}
+                            onChange={(newValue) => setAppliedDate(newValue)}
+                            maxDate={dayjs()}
+                            slotProps={{ textField: { fullWidth: true } }}
                         />
                         {error && <Typography color="error" variant="body2">{error}</Typography>}
                     </DialogContent>

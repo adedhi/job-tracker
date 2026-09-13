@@ -41,13 +41,14 @@ router.get("/:id", async (req: Request<{ id: string }>, res: Response) => {
 
 router.post("/", async (req: Request, res: Response) => {
     try {
-        const { roleTitle, jobUrl, status, salary, companyId } = req.body as CreateApplicationPayload;
+        const { roleTitle, jobUrl, status, salary, appliedDate, companyId } = req.body as CreateApplicationPayload;
         const application = await prisma.application.create({
             data: {
                 roleTitle,
                 status,
                 jobUrl: jobUrl || null,
                 salary: salary || null,
+                appliedDate: appliedDate ? new Date(appliedDate) : new Date(),
                 companyId: companyId || null,
                 userId: req.userId!
             },
@@ -63,9 +64,14 @@ router.post("/", async (req: Request, res: Response) => {
 router.patch("/:id", async (req: Request<{ id: string }>, res: Response) => {
     try {
         const updates = req.body as UpdateApplicationPayload;
+        const data = {
+            ...updates,
+            ...(updates.appliedDate && { appliedDate: new Date(updates.appliedDate) })
+        };
+
         const result = await prisma.application.updateMany({
             where: { id: req.params.id, userId: req.userId! },
-            data: updates
+            data
         });
 
         if (result.count === 0) {

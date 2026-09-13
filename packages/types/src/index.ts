@@ -15,6 +15,7 @@ export type CreateApplicationPayload = {
     status: ApplicationStatus;
     jobUrl?: string;
     salary?: string;
+    appliedDate?: string;
     companyId?: string;
 };
 
