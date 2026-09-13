@@ -6,6 +6,7 @@ import {
 } from '@mui/material';
 import { Add, Edit, Delete, Search } from '@mui/icons-material';
 import { ApplicationResponse, ApplicationStatus } from '@job-tracker/types';
+import { formatDateForDisplay } from '../helpers/date';
 import { useApplicationsData } from '../hooks/useApplicationsData';
 import { useSnackbar } from '../hooks/useSnackbar';
 import { STATUS_COLORS } from '../theme';
@@ -220,7 +221,7 @@ export default function ApplicationsPage() {
                                         />
                                     </TableCell>
                                     <TableCell sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.85rem" }}>
-                                        {new Date(app.appliedDate).toLocaleDateString(undefined, { timeZone: "UTC" })}
+                                        {formatDateForDisplay(app.appliedDate)}
                                     </TableCell>
                                     <TableCell sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.85rem" }}>
                                         {app.salary ?? '—'}

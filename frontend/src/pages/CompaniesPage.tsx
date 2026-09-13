@@ -6,6 +6,7 @@ import {
 } from '@mui/material';
 import { Add, Edit, Delete, Search, ExpandMore, ExpandLess } from '@mui/icons-material';
 import { CompanyWithApplicationsResponse, CompanyResponse, ApplicationResponse } from '@job-tracker/types';
+import { formatDateForDisplay } from '../helpers/date';
 import { useCompaniesData } from '../hooks/useCompaniesData';
 import { useSnackbar } from '../hooks/useSnackbar';
 import { STATUS_COLORS } from '../theme';
@@ -252,7 +253,7 @@ export default function CompaniesPage() {
                                                                         fontFamily: '"IBM Plex Mono", monospace'
                                                                     }}
                                                                 >
-                                                                    {new Date(app.appliedDate).toLocaleDateString(undefined, { timeZone: "UTC" })}
+                                                                    {formatDateForDisplay(app.appliedDate)}
                                                                 </Typography>
                                                             </Box>
                                                         ))}

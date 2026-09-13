@@ -7,6 +7,7 @@ import {
 import { Add } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers';
 import { ApplicationResponse, ApplicationStatus, CompanyResponse } from '@job-tracker/types';
+import { parseStoredDate, formatDateForApi } from '../../helpers/date';
 import { useApplicationsData } from '../../hooks/useApplicationsData';
 import { useCompaniesData } from '../../hooks/useCompaniesData';
 import { useSnackbar } from '../../hooks/useSnackbar';
@@ -86,7 +87,7 @@ export default function ApplicationDialog({
             status,
             jobUrl: jobUrl.trim() || undefined,
             salary: salary.trim() || undefined,
-            appliedDate: appliedDate?.format("YYYY-MM-DD"),
+            appliedDate: appliedDate ? formatDateForApi(appliedDate) : undefined,
             companyId: selectedCompany?.id
         };
 
@@ -113,7 +114,7 @@ export default function ApplicationDialog({
         setStatus(application?.status ?? "APPLIED");
         setJobUrl(application?.jobUrl ?? "");
         setSalary(application?.salary ?? "");
-        setAppliedDate(application?.appliedDate ? dayjs(application.appliedDate) : dayjs());
+        setAppliedDate(application?.appliedDate ? parseStoredDate(application.appliedDate) : dayjs());
         setSelectedCompany(application?.company ?? null);
         setCompanyInput(application?.company?.name ?? "");
         setError(null);

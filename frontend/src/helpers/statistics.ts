@@ -1,4 +1,5 @@
 import { ApplicationResponse, ApplicationStatus } from '@job-tracker/types';
+import { formatDateForGrouping } from './date';
 
 export type StatusCount = {
     status: ApplicationStatus;
@@ -37,8 +38,7 @@ export function computeApplicationsOverTime(applications: ApplicationResponse[])
     const counts = new Map<string, number>();
 
     applications.forEach((app) => {
-        const date = new Date(app.appliedDate);
-        const key = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+        const key = formatDateForGrouping(app.appliedDate);
         counts.set(key, (counts.get(key) ?? 0) + 1);
     });
 
