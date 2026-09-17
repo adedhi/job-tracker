@@ -11,7 +11,11 @@ router.get("/", async (req: Request, res: Response) => {
     try {
         const applications = await prisma.application.findMany({
             where: { userId: req.userId! },
-            include: { company: true }
+            include: { company: true },
+            orderBy: [
+                { appliedDate: "desc" },
+                { updatedAt: "desc" }
+            ]
         });
 
         res.status(200).json(applications);
