@@ -4,7 +4,7 @@ import {
   Collapse, Table, TableHead, TableBody, TableRow, TableCell,
   TableSortLabel, Chip, InputAdornment, CircularProgress
 } from '@mui/material';
-import { Add, Edit, Delete, Search, ExpandMore, ExpandLess } from '@mui/icons-material';
+import { Add, Clear, Delete, Edit, ExpandLess, ExpandMore, Search } from '@mui/icons-material';
 import { CompanyWithApplicationsResponse, CompanyResponse, ApplicationResponse } from '@job-tracker/types';
 import { formatDateForDisplay } from '../helpers/date';
 import { useCompaniesData } from '../hooks/useCompaniesData';
@@ -132,7 +132,23 @@ export default function CompaniesPage() {
                 sx={{ mb: 2, minWidth: 240 }}
                 slotProps={{
                     input: {
-                        startAdornment: <InputAdornment position="start"><Search fontSize="small" /></InputAdornment>
+                        sx: { pr: 2 },
+                        startAdornment: <InputAdornment position="start"><Search fontSize="small" /></InputAdornment>,
+                        endAdornment: (
+                            <InputAdornment
+                                position="end"
+                                sx={{ position: "absolute", right: 8 }}
+                            >
+                                <IconButton
+                                    size="small"
+                                    edge="end"
+                                    onClick={() => setSearch("")}
+                                    sx={{ visibility: search ? "visible" : "hidden" }}
+                                >
+                                    <Clear fontSize="small" />
+                                </IconButton>
+                            </InputAdornment>
+                        )
                     }
                 }}
             />

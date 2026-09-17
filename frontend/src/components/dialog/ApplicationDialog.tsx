@@ -47,7 +47,8 @@ export default function ApplicationDialog({
     const [error, setError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const isEditing = application !== null;
-    const isFormValid = roleTitle.trim().length > 0;
+    const companyMismatch = companyInput.trim().length > 0 && companyInput !== selectedCompany?.name;
+    const isFormValid = roleTitle.trim().length > 0 && !companyMismatch;
 
     async function handleCompanyChange(value: CompanyOption | string | null) {
         if (value === null) {
@@ -183,7 +184,17 @@ export default function ApplicationDialog({
                                 </Box>
                             )}
                             renderInput={(params) => (
-                                <TextField {...params} label="Company" placeholder="Search or add a company" />
+                                <TextField
+                                    {...params}
+                                    label="Company"
+                                    placeholder="Search or add a company"
+                                    error={companyMismatch}
+                                    helperText={
+                                        companyMismatch
+                                            ? 'Select a company from the list or click "Add new company" to create it'
+                                            : "Leave blank if there\'s no company yet"
+                                    }
+                                />
                             )}
                         />
                         <TextField
