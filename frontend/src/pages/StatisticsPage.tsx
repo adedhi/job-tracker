@@ -1,5 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
-import { CircularProgress, Container, Box, Button, Paper, Typography } from '@mui/material';
+import {
+    CircularProgress, Container, Box, Button, Paper, Typography,
+    ToggleButton, ToggleButtonGroup
+} from '@mui/material';
 import {
   BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Rectangle
@@ -7,6 +10,7 @@ import {
 import { ApplicationResponse, ApplicationStatus } from '@job-tracker/types';
 import { useApplicationsData } from '../hooks/useApplicationsData';
 import { STATUS_COLORS } from '../theme';
+import { TimeInterval } from '../helpers/date';
 import {
   computeStatusCounts, computeResponseRate, computeActiveCount,
   computeApplicationsOverTime, computeTopCompanies,
@@ -27,11 +31,12 @@ export default function StatisticsPage() {
     const { fetchApplications } = useApplicationsData();
     const [applications, setApplications] = useState<ApplicationResponse[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [timeInterval, setTimeInterval] = useState<TimeInterval>('month');
 
     const statusCounts = useMemo(() => computeStatusCounts(applications), [applications]);
     const responseRate = useMemo(() => computeResponseRate(applications), [applications]);
     const activeCount = useMemo(() => computeActiveCount(applications), [applications]);
-    const overTime = useMemo(() => computeApplicationsOverTime(applications), [applications]);
+    const overTime = useMemo(() => computeApplicationsOverTime(applications, timeInterval), [applications, timeInterval]);
     const topCompanies = useMemo(() => computeTopCompanies(applications), [applications]);
 
     useEffect(() => {
@@ -107,15 +112,27 @@ export default function StatisticsPage() {
                     </ResponsiveContainer>
                 </Paper>
                 <Paper sx={{ p: 3 }}>
-                    <Typography variant="subtitle1" sx={{ mb: 2 }}>
-                        Applications Over Time
-                    </Typography>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                        <Typography variant="subtitle1">
+                            Applications Over Time
+                        </Typography>
+                        <ToggleButtonGroup
+                            value={timeInterval}
+                            exclusive
+                            onChange={(_, v) => v && setTimeInterval(v)}
+                            size="small"
+                        >
+                            <ToggleButton value="day" sx={{ textTransform: "none", px: 1.5 }}>Day</ToggleButton>
+                            <ToggleButton value="week" sx={{ textTransform: "none", px: 1.5 }}>Week</ToggleButton>
+                            <ToggleButton value="month" sx={{ textTransform: "none", px: 1.5 }}>Month</ToggleButton>
+                        </ToggleButtonGroup>
+                    </Box>
                     <ResponsiveContainer width="100%" height={280}>
                         <AreaChart data={overTime}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#D8DCE5" />
                             <XAxis dataKey="label" tick={{ fontSize: 12 }} />
                             <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-                            <Tooltip />
+                            <Tooltip labelFormatter={(_, payload) => payload?.[0]?.payload?.tooltipLabel} />
                             <Area type="monotone" dataKey="count" stroke="#3D4B94" fill="#3D4B94" fillOpacity={0.15} />
                         </AreaChart>
                     </ResponsiveContainer>

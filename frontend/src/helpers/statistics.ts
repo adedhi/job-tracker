@@ -1,14 +1,16 @@
+import dayjs from 'dayjs';
 import { ApplicationResponse, ApplicationStatus } from '@job-tracker/types';
-import { formatDateForGrouping } from './date';
+import { formatDateForGrouping, TimeInterval } from './date';
 
 export type StatusCount = {
     status: ApplicationStatus;
     count: number
 };
 
-export type MonthlyCount = {
+export type TimeBucketCount = {
     label: string;
     count: number;
+    tooltipLabel: string;
 };
 
 export type CompanyCount = {
@@ -34,22 +36,73 @@ export function computeActiveCount(applications: ApplicationResponse[]): number 
     return applications.filter((app) => app.status === "APPLIED" || app.status === "INTERVIEWING").length;
 }
 
-export function computeApplicationsOverTime(applications: ApplicationResponse[]): MonthlyCount[] {
-    const counts = new Map<string, number>();
+/**
+ * Generates every key between the first and last sorted keys, stepping by the
+ * given interval, so that time periods with zero applications still appear.
+ */
+function fillTimeRange(sortedKeys: string[], interval: TimeInterval): string[] {
+    if (sortedKeys.length <= 1) return sortedKeys;
 
+    const parseKey = (key: string) => dayjs.utc(interval === 'month' ? `${key}-01` : key); // Add a -01 to the YYYY-MM month keys
+
+    const allKeys: string[] = [];
+    const end = parseKey(sortedKeys[sortedKeys.length - 1]);
+    let date = parseKey(sortedKeys[0]);
+
+    while (date.isBefore(end) || date.isSame(end, 'day')) {
+        allKeys.push(formatKey(date));
+        date = date.add(1, interval);
+    }
+
+    return allKeys;
+}
+
+export function computeApplicationsOverTime(
+    applications: ApplicationResponse[],
+    interval: TimeInterval = 'month'
+): TimeBucketCount[] {
+    if (applications.length === 0) return [];
+
+    const counts = new Map<string, number>();
     applications.forEach((app) => {
-        const key = formatDateForGrouping(app.appliedDate);
+        const key = formatDateForGrouping(app.appliedDate, interval);
         counts.set(key, (counts.get(key) ?? 0) + 1);
     });
 
-    return [...counts.keys()].sort().map((key) => {
-        const [year, month] = key.split("-");
-        const label = new Date(Number(year), Number(month) - 1).toLocaleDateString(undefined, {
-            year: "numeric",
-            month: "short",
-            timeZone: "UTC"
-        });
-        return { label, count: counts.get(key)! };
+    const sortedKeys = [...counts.keys()].sort();
+    const allKeys = fillTimeRange(sortedKeys, interval);
+
+    return allKeys.map((key) => {
+        let label: string;
+        switch (interval) {
+            case 'day':
+            case 'week': {
+                const [year, month, day] = key.split("-").map(Number);
+                label = new Date(Date.UTC(year, month - 1, day)).toLocaleDateString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                    timeZone: "UTC"
+                });
+                break;
+            }
+            case 'month': {
+                const [year, month] = key.split("-").map(Number);
+                label = new Date(Date.UTC(year, month - 1, 1)).toLocaleDateString(undefined, {
+                    year: "numeric",
+                    month: "short",
+                    timeZone: "UTC"
+                });
+                break;
+            }
+        }
+
+        const year = key.slice(0, 4);
+        const tooltipLabel =
+            interval === 'week' ? `Week of ${label}, ${year}` :
+            interval === 'day'  ? `${label}, ${year}` :
+            label;
+
+        return { label, count: counts.get(key) ?? 0, tooltipLabel };
     });
 }
 
