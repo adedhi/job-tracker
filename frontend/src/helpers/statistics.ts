@@ -44,6 +44,7 @@ function fillTimeRange(sortedKeys: string[], interval: TimeInterval): string[] {
     if (sortedKeys.length <= 1) return sortedKeys;
 
     const parseKey = (key: string) => dayjs.utc(interval === 'month' ? `${key}-01` : key); // Add a -01 to the YYYY-MM month keys
+    const formatKey = (d: dayjs.Dayjs) => interval === 'month' ? d.format('YYYY-MM') : d.format('YYYY-MM-DD');
 
     const allKeys: string[] = [];
     const end = parseKey(sortedKeys[sortedKeys.length - 1]);
